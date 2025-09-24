@@ -43,7 +43,6 @@
             <div class="vr bg-white mx-2 d-none d-lg-block"></div>
             {% if user.is_authenticated %}
               {% if user.is_recruiter %}
-                <a class="nav-link" href="{% url 'recruiters.dashboard' %}">Dashboard</a>
                 <a class="nav-link" href="{% url 'jobs.create' %}">Post Job</a>
               {% else %}
                 <a class="nav-link" href="{% url 'profiles.view' %}">Profile</a>
