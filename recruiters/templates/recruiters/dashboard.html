@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1>Recruiter Dashboard</h1>
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <h3>Posted Jobs</h3>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Posted Date</th>
+                        <th>Applications</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for job in jobs %}
+                    <tr>
+                        <td>{{ job.title }}</td>
+                        <td>{{ job.created_at }}</td>
+                        <td>{{ job.applications.count }}</td>
+                        <td>
+                            <a href="{% url 'jobs.edit' job.id %}" class="btn btn-sm btn-primary">Edit</a>
+                            <a href="{% url 'jobs.delete' job.id %}" class="btn btn-sm btn-danger">Delete</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

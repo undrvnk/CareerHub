@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-fluid p-5 bg-primary text-white text-center">
+    <h1>Welcome to CareerHub</h1>
+    <p class="lead">Your Gateway to Professional Opportunities</p>
+</div>
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 mx-auto text-center">
+            <h2>Find Your Dream Job</h2>
+            <p class="lead">
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+            </p>
+            <p>
+                Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+            </p>
+            <a href="{% url 'jobs.index' %}" class="btn btn-primary btn-lg mt-3">Browse Jobs</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
