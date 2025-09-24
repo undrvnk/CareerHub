@@ -1,16 +1,48 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container mt-5">
-    <h1>My Profile</h1>
-    <div class="row mt-4">
-        <div class="col-md-8">
-            <form method="post">
-                {% csrf_token %}
-                {{ form.as_p }}
-                <button type="submit" class="btn btn-primary">Update Profile</button>
-            </form>
+<div class="container mt-4">
+    {% if profile %}
+        <div class="row">
+            <div class="col-md-8 mx-auto">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h1 class="card-title">{{ profile.user.username }}'s Profile</h1>
+                            <a href="{% url 'profiles.edit' %}" class="btn btn-primary">Edit Profile</a>
+                        </div>
+                        
+                        <h5 class="text-primary">Headline</h5>
+                        <p class="mb-4">{{ profile.headline }}</p>
+
+                        <h5 class="text-primary">Skills</h5>
+                        <div class="mb-4">
+                            {% for skill in profile.skills.all %}
+                                <span class="badge bg-secondary me-2">{{ skill.name }}</span>
+                            {% endfor %}
+                        </div>
+
+                        <h5 class="text-primary">Education</h5>
+                        <p class="mb-4">{{ profile.education|linebreaks }}</p>
+
+                        <h5 class="text-primary">GPA</h5>
+                        <p class="mb-4">{{ profile.gpa|linebreaks }}</p>
+
+                        <h5 class="text-primary">Work Experience</h5>
+                        <p class="mb-4">{{ profile.work_experience|linebreaks }}</p>
+
+                        <h5 class="text-primary">Links</h5>
+                        <p>{{ profile.links|linebreaks }}</p>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
+    {% else %}
+        <div class="text-center">
+            <h2>Create Your Profile</h2>
+            <p>Share your professional background with recruiters</p>
+            <a href="{% url 'profiles.edit' %}" class="btn btn-primary btn-lg">Create Profile</a>
+        </div>
+    {% endif %}
 </div>
 {% endblock %}

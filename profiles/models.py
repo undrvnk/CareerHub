@@ -6,6 +6,7 @@ class Profile(models.Model):
     headline = models.CharField(max_length=200)
     skills = models.ManyToManyField('Skill')
     education = models.TextField()
+    gpa = models.CharField(max_length=20)
     work_experience = models.TextField()
     links = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
