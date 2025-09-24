@@ -8,7 +8,7 @@ def index(request):
 
 @login_required
 def create(request):
-    if not request.user.is_recruiter:
+    if not request.user.role == "recruiter":
         return redirect('jobs.index')
     if request.method == 'POST':
         # Handle job creation form submission
@@ -17,7 +17,7 @@ def create(request):
 
 @login_required
 def applications(request):
-    if request.user.is_recruiter:
+    if request.user.role == "recruiter":
         return redirect('recruiters.dashboard')
     applications = Application.objects.filter(applicant=request.user)
     return render(request, 'jobs/applications.html', {'applications': applications})
@@ -28,7 +28,7 @@ def detail(request, job_id):
 
 @login_required
 def edit(request, job_id):
-    if not request.user.is_recruiter:
+    if not request.user.role == "recruiter":
         return redirect('jobs.index')
     job = get_object_or_404(Job, pk=job_id)
     if request.method == 'POST':
@@ -38,7 +38,7 @@ def edit(request, job_id):
 
 @login_required
 def delete(request, job_id):
-    if not request.user.is_recruiter:
+    if not request.user.role == "recruiter":
         return redirect('jobs.index')
     job = get_object_or_404(Job, pk=job_id)
     if request.method == 'POST':
