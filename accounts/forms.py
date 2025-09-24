@@ -15,17 +15,17 @@ class CustomUserCreationForm(UserCreationForm):
     class Meta(UserCreationForm.Meta):
         model = User
         fields = (
-            "username",
             "first_name",
             "last_name",
-            "role",
+            "username",
             "password1",
             "password2",
+            "role",
         )
 
     def __init__(self, *args, **kwargs):
         super(CustomUserCreationForm, self).__init__(*args, **kwargs)
-        for fieldname in ['username', 'first_name', 'last_name', 'password1', 'password2']:
+        for fieldname in ['first_name', 'last_name', 'username', 'password1', 'password2']:
             self.fields[fieldname].help_text = None
             self.fields[fieldname].widget.attrs.update(
                 {'class': 'form-control'}
