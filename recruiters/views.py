@@ -1,7 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .models import Post#, Application
-from profiles.models import Profile
 
 def index(request):
     posts = Post.objects.all().order_by('-created_at')
@@ -30,11 +29,6 @@ def create(request):
 #         return redirect('recruiters.dashboard')
 #     applications = Application.objects.filter(applicant=request.user)
 #     return render(request, 'jobs/applications.html', {'applications': applications})
-
-@login_required
-def candidates(request):
-    candidates = Profile.objects.all().order_by('-created_at')
-    return render(request, 'recruiters/candidates.html', {'candidates': candidates})
 
 def detail(request, job_id):
     post = get_object_or_404(Post, pk=job_id)
