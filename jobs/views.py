@@ -18,7 +18,7 @@ def create(request):
 @login_required
 def applications(request):
     if request.user.role == "recruiter":
-        return redirect('recruiters.dashboard')
+        return redirect('jobs.index')
     applications = Application.objects.filter(applicant=request.user)
     return render(request, 'jobs/applications.html', {'applications': applications})
 

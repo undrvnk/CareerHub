@@ -42,8 +42,9 @@
               href="{% url 'jobs.index' %}">Jobs</a>
             <div class="vr bg-white mx-2 d-none d-lg-block"></div>
             {% if user.is_authenticated %}
-              {% if user.is_recruiter %}
-                <a class="nav-link" href="{% url 'jobs.create' %}">Post Job</a>
+              {% if user.role == "recruiter" %}
+                <a class="nav-link" href="{% url 'recruiters.index' %}">Postings</a>
+                <a class="nav-link" href="{% url 'recruiters.create' %}">Post Job</a>
               {% else %}
                 <a class="nav-link" href="{% url 'profiles.view' %}">Profile</a>
                 <a class="nav-link" href="{% url 'jobs.applications' %}">Applications</a>

@@ -11,7 +11,21 @@
                     <h5 class="card-title">{{ post.title }}</h5>
                     <h6 class="card-subtitle mb-2 text-muted">{{ post.company }}</h6>
                     <p class="card-text">{{ post.description|truncatewords:30 }}</p>
-                    <a href="{% url 'posts.detail' post.id %}" class="btn btn-primary">View Details</a>
+            {% if user.is_authenticated and user == post.recruiter %}
+
+            <a class="btn btn-primary"
+
+              href="{% url 'recruiters.edit' id=post.id %}">Edit
+
+            </a>
+
+            <a class="btn btn-danger"
+
+              href="{% url 'recruiters.delete' id=post.id %}">Delete
+
+            </a>
+
+            {% endif %}
                 </div>
             </div>
         </div>

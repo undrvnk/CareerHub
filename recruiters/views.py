@@ -12,7 +12,15 @@ def create(request):
         return redirect('recruiters.index')
     if request.method == 'POST':
         # Handle job creation form submission
-        return redirect('recruiters.index')
+        post = Post()
+        post.title = request.POST['title']
+        post.company = request.POST['company']
+        post.description = request.POST['description']
+        post.location = request.POST['location']
+        post.salary_range = request.POST['salary_range']
+        post.recruiter = request.user
+        post.save()
+        return render(request, 'recruiters/create.html', {'posts': post})
     return render(request, 'recruiters/create.html')
 
 # @login_required
@@ -27,13 +35,27 @@ def detail(request, job_id):
     return render(request, 'posts/detail.html', {'post': post})
 
 @login_required
-def edit(request, post_id):
+def edit(request, id):
     if not request.user.role == "recruiter":
         return redirect('post.index')
-    post = get_object_or_404(Post, pk=post_id)
+    post = get_object_or_404(Post, pk=id)
+    if request.method == 'GET':
+
+        post = Post.objects.get(id=id)
+        return render(request, 'recruiters/edit.html',
+
+            {'posts': post})
     if request.method == 'POST':
         # Handle job edit form submission
-        return redirect('posts.detail', post_id=post.id)
+        post = Post.objects.get(id=id)
+        post.title = request.POST['title']
+        post.company = request.POST['company']
+        post.description = request.POST['description']
+        post.location = request.POST['location']
+        post.salary_range = request.POST['salary_range']
+        post.recruiter = request.user
+        post.save()
+        return render(request, 'recruiters/create.html', {'posts': post})
     return render(request, 'posts/edit.html', {'post': post})
 
 @login_required
