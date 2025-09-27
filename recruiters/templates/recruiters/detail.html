@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1>{{ post.title }}</h1>
+    <h4 class="text-muted">{{ post.company }}</h4>
+    <p>{{ post.description }}</p>
+
+    {% if user.is_authenticated and user == post.recruiter %}
+        <a class="btn btn-primary" href="{% url 'recruiters.edit' id=post.id %}">Edit</a>
+        <a class="btn btn-danger" href="{% url 'recruiters.delete' id=post.id %}">Delete</a>
+    {% endif %}
+
+    <a class="btn btn-secondary" href="{% url 'recruiters.index' %}">Back to Jobs</a>
+</div>
+{% endblock %}
