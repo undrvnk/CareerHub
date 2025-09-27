@@ -1,7 +1,8 @@
+# jobs/models.py (Change made)
 from django.db import models
 from accounts.models import User
 from profiles.models import Skill
-from recruiters.models import Post
+
 class Job(models.Model):
     title = models.CharField(max_length=200)
     company = models.CharField(max_length=200)
@@ -22,9 +23,9 @@ class Application(models.Model):
         ('closed', 'Closed'),
     ]
     
-    post = models.ForeignKey(Post, on_delete=models.CASCADE, default=None)
+    job = models.ForeignKey('recruiters.Post', on_delete=models.CASCADE)    
     applicant = models.ForeignKey(User, on_delete=models.CASCADE)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='applied')
-    note = models.TextField()
+    note = models.TextField(blank=True) 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

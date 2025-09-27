@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Job, Application
+from .models import Job
 # Register your models here.
 # class UserAdmin(admin.ModelAdmin):
 #     fields = ('username', 'first_name', 'last_name', 'role', 'email', 
@@ -9,5 +9,4 @@ from .models import Job, Application
 #     search_fields = ('username', 'first_name', 'last_name')
 #     ordering = ('username',)
 
-admin.site.register(Job)
-admin.site.register(Application)
+admin.site.register(Job)#, UserAdmin)
