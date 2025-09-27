@@ -6,5 +6,5 @@ urlpatterns = [
     path('create/', views.create, name='recruiters.create'),
     path('<int:id>/post_id/', views.detail, name='recruiters.detail'),
     path('<int:id>/post_id/edit/', views.edit, name='recruiters.edit'),
-    path('<int:id>/post_id/delete/', views.delete, name='recruiters.delete'),
+    path('<int:id>/delete/', views.delete, name='recruiters.delete'),
 ]
