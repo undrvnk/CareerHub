@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from .models import Post#, Application
+from .models import Post, Applicant#, Application
 
 def index(request):
     posts = Post.objects.all().order_by('-created_at')
@@ -75,6 +75,32 @@ def delete(request, id):
     return redirect('recruiters.index')
 
 @login_required
+@login_required
 def detail(request, id):
-    post = get_object_or_404(Post, pk=id)
-    return render(request, 'recruiters/detail.html', {'post': post})
+    # Get the job post
+    post = get_object_or_404(Post, id=id)
+
+    # Get all applicants for this post
+    applicants = Applicant.objects.filter(post=post).order_by('-applied_at')
+
+    # Separate applicants by stage
+    applied_list = applicants.filter(stage='Applied')
+    interview_list = applicants.filter(stage='Interview')
+    offer_list = applicants.filter(stage='Offer')
+    hired_list = applicants.filter(stage='Hired')
+
+    # Pipeline stages and mapping
+    stages = ['Applied', 'Interview', 'Offer', 'Hired']
+    applicants_by_stage = {
+        'Applied': applied_list,
+        'Interview': interview_list,
+        'Offer': offer_list,
+        'Hired': hired_list,
+    }
+
+    # Render the detail page
+    return render(request, 'recruiters/detail.html', {
+        'post': post,
+        'stages': stages,
+        'applicants_by_stage': applicants_by_stage,
+    })

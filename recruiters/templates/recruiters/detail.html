@@ -1,16 +1,41 @@
 {% extends 'base.html' %}
+{% load custom_tags %} {# for dict_get filter #}
 
 {% block content %}
 <div class="container mt-5">
+    <!-- Job Details -->
     <h1>{{ post.title }}</h1>
-    <h4 class="text-muted">{{ post.company }}</h4>
+    <h5 class="text-muted">{{ post.company }}</h5>
     <p>{{ post.description }}</p>
+    <p>Location: {{ post.location }}</p>
+    <p>Salary: {{ post.salary_range }}</p>
 
     {% if user.is_authenticated and user == post.recruiter %}
         <a class="btn btn-primary" href="{% url 'recruiters.edit' id=post.id %}">Edit</a>
         <a class="btn btn-danger" href="{% url 'recruiters.delete' id=post.id %}">Delete</a>
     {% endif %}
 
-    <a class="btn btn-secondary" href="{% url 'recruiters.index' %}">Back to Jobs</a>
+    <hr>
+
+    <!-- Applicant Pipeline / Kanban -->
+    <h3>Applicant Pipeline</h3>
+    <div class="row">
+        {% for stage in stages %}
+        <div class="col-md-3">
+            <h5>{{ stage|capfirst }}</h5>
+            <div class="card p-2 mb-3" style="min-height: 200px;">
+                {% for applicant in applicants_by_stage|dict_get:stage %}
+                    <div class="card mb-2 p-2">
+                        {{ applicant.user.username }}
+                        <br>
+                        <small class="text-muted">{{ applicant.applied_at|date:"M d, Y" }}</small>
+                    </div>
+                {% empty %}
+                    <p class="text-muted">No applicants</p>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
 </div>
 {% endblock %}
