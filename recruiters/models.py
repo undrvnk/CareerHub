@@ -1,7 +1,7 @@
 from django.db import models
 from accounts.models import User
 from profiles.models import Skill
-from jobs.models import Job
+#from jobs.models import Job
 class Post(models.Model):
     id = models.AutoField(primary_key=True)
     title = models.CharField(max_length=200)
@@ -13,3 +13,4 @@ class Post(models.Model):
     recruiter = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    #job = models.OneToOneField(Job, on_delete=models.CASCADE)
