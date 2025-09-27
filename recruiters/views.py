@@ -10,8 +10,8 @@ def index(request):
 def create(request):
     if not request.user.role == "recruiter":
         return redirect('recruiters.index')
+    
     if request.method == 'POST':
-        # Handle job creation form submission
         post = Post()
         post.title = request.POST['title']
         post.company = request.POST['company']
@@ -20,7 +20,10 @@ def create(request):
         post.salary_range = request.POST['salary_range']
         post.recruiter = request.user
         post.save()
-        return render(request, 'recruiters/create.html', {'posts': post})
+        
+        # FIX: Redirect to the index page after successful creation
+        return redirect('recruiters.index') 
+    
     return render(request, 'recruiters/create.html')
 
 # @login_required
