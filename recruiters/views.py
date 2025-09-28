@@ -176,11 +176,21 @@ def move_application(request):
             pass
 
     if user:
-        job_app = JobApplication.objects.filter(post=post, applicant=user).first()
+        # JobApplication uses field name 'job' for the FK to Post
+        job_app = JobApplication.objects.filter(job=post, applicant=user).first()
         if job_app:
-            job_app.status = target.capitalize()
-            job_app.save()
-            return JsonResponse({'ok': True})
+            # Normalize target to the allowed status keys used by the model
+            allowed = [c[0] for c in JobApplication.STATUS_CHOICES]
+            t = (target or '').lower()
+            # Map UI 'hired' to backend 'closed' if necessary
+            if t == 'hired' and 'closed' in allowed:
+                t = 'closed'
+            if t in allowed:
+                job_app.status = t
+                job_app.save()
+                return JsonResponse({'ok': True})
+            else:
+                return JsonResponse({'ok': False, 'error': f"invalid target '{target}'. allowed: {allowed}"}, status=400)
 
     # fallback: recruiters.Applicant
     if applicant_id:
