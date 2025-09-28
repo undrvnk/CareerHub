@@ -33,6 +33,7 @@
     <p>{{ post.description }}</p>
     <p>Location: {{ post.location }}</p>
     <p>Salary: {{ post.salary_range }}</p>
+    <p>Visa Sponsorship: {{ post.visa_sponsorship }}</p>
 
     {% if user.is_authenticated and user == post.recruiter %}
         <a class="btn btn-primary" href="{% url 'recruiters.edit' id=post.id %}">Edit</a>

@@ -17,10 +17,11 @@ def index(request):
     visa_term = request.GET.get('search_visa')
     if name_term or skill_term or location_term or salary_term or remote_term or visa_term:
         jobs = Post.objects.filter(title__contains=name_term)
+        #TODO: make salary range a numeric comparison
         jobs = jobs.filter(location__contains=location_term).filter(salary_range__contains=salary_term).filter(location__contains=remote_term).filter(visa_sponsorship__contains=visa_term)
         #candidates = candidates.filter(education__contains=education_term).filter(work_experience__contains=experience_term)
         if (skill_term):
-            jobs = jobs.filter(skills__name__contains=skill_term)
+            jobs = jobs.filter(required_skills__name__contains=skill_term)
     else:
         jobs = Post.objects.all().order_by('-created_at')
     #candidates = Profile.objects.all().order_by('-created_at')

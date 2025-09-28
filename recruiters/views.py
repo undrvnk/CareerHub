@@ -27,6 +27,8 @@ def create(request):
             description=request.POST['description'],
             location=request.POST['location'],
             salary_range=request.POST['salary_range'],
+            #visa_sponsorship=request.POST['visa_sponsorship'],
+            visa_sponsorship='N/A', #delete this line after fixing visa sponsorship input form
             recruiter=request.user,
         )
         post.save()
@@ -98,7 +100,7 @@ def detail(request, id):
     post = get_object_or_404(Post, id=id)
 
     applicants = Applicant.objects.filter(post=post).order_by('-applied_at')
-    job_applications = JobApplication.objects.filter(post=post).order_by('-created_at')
+    job_applications = JobApplication.objects.filter(job=post).order_by('-created_at')
 
     stages = ['applied', 'interview', 'offer', 'hired']
     unified = {stage: [] for stage in stages}

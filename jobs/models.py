@@ -9,6 +9,7 @@ class Job(models.Model):
     description = models.TextField()
     location = models.CharField(max_length=200)
     salary_range = models.CharField(max_length=100)
+    visa_sponsorship = models.CharField(max_length=200)
     required_skills = models.ManyToManyField(Skill)
     recruiter = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
