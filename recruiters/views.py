@@ -33,7 +33,18 @@ def create(request):
 
 @login_required
 def candidates(request):
-    candidates = Profile.objects.all().order_by('-created_at')
+    name_term = request.GET.get('search_name')
+    skill_term = request.GET.get('search_skill')
+    education_term = request.GET.get('search_education')
+    experience_term = request.GET.get('search_experience')
+    if name_term or skill_term or education_term or experience_term:
+        candidates = Profile.objects.filter(user__first_name__contains=name_term) | Profile.objects.filter(user__last_name__contains=name_term)
+        candidates = candidates.filter(education__contains=education_term).filter(work_experience__contains=experience_term)
+        if (skill_term):
+            candidates = candidates.filter(skills__name__contains=skill_term)
+    else:
+        candidates = Profile.objects.all().order_by('-created_at')
+    #candidates = Profile.objects.all().order_by('-created_at')
     return render(request, 'recruiters/candidates.html', {'candidates': candidates})
 
 def detail(request, job_id):
