@@ -13,6 +13,11 @@ class Post(models.Model):
     recruiter = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    VISA_CHOICES = [
+        ('yes', 'Yes'),
+        ('no', 'No'),
+    ]
+    visa_sponsorship = models.CharField(max_length=3, choices=VISA_CHOICES, default='no')
     #job = models.OneToOneField(Job, on_delete=models.CASCADE)
 
 

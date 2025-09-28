@@ -9,8 +9,24 @@ from .forms import ApplicationForm
 
 # List all jobs
 def index(request):
-    jobs = Post.objects.all().order_by('-created_at')
+    name_term = request.GET.get('search_name')
+    skill_term = request.GET.get('search_skill')
+    location_term = request.GET.get('search_location')
+    salary_term = request.GET.get('search_salary')
+    remote_term = request.GET.get('search_remote')
+    visa_term = request.GET.get('search_visa')
+    if name_term or skill_term or location_term or salary_term or remote_term or visa_term:
+        jobs = Post.objects.filter(title__contains=name_term)
+        jobs = jobs.filter(location__contains=location_term).filter(salary_range__contains=salary_term).filter(location__contains=remote_term).filter(visa_sponsorship__contains=visa_term)
+        #candidates = candidates.filter(education__contains=education_term).filter(work_experience__contains=experience_term)
+        if (skill_term):
+            jobs = jobs.filter(skills__name__contains=skill_term)
+    else:
+        jobs = Post.objects.all().order_by('-created_at')
+    #candidates = Profile.objects.all().order_by('-created_at')
     return render(request, 'jobs/index.html', {'jobs': jobs})
+    #jobs = Post.objects.all().order_by('-created_at')
+    #return render(request, 'jobs/index.html', {'jobs': jobs})
 
 # Job detail view and application form
 @login_required
@@ -18,7 +34,7 @@ def detail(request, job_id):
     job = get_object_or_404(Post, pk=job_id)
 
     # Check if the user has already applied
-    has_applied = Application.objects.filter(post=job, applicant=request.user).exists()
+    has_applied = Application.objects.filter(job=job, applicant=request.user).exists()
     is_recruiter = request.user.role == 'recruiter'
 
     if request.method == 'POST':
@@ -29,7 +45,7 @@ def detail(request, job_id):
         form = ApplicationForm(request.POST)
         if form.is_valid():
             application = Application(
-                post=job,
+                job=job,
                 applicant=request.user,
                 note=form.cleaned_data['note'],
                 status='applied'
@@ -107,7 +123,7 @@ def apply(request, job_id):
             return redirect('jobs.detail', job_id=job.id)
 
         application = Application(
-            post=job,
+            job=job,
             applicant=request.user,
             note=note,
             status='applied'

@@ -4,6 +4,39 @@
 <div class="container mt-5">
     <h1>Available Jobs</h1>
     <div class="row mt-4">
+        <form method="GET">
+            <div class="row">
+                <div class="col-auto">
+                    <div class="input-group col-auto">
+                        <div class="input-group-text">Title</div>
+                        <input type="text" class="form-control" name="search_name">
+                    </div>
+                    <div class="input-group col-auto">
+                        <div class="input-group-text">Skill</div>
+                        <input type="text" class="form-control" name="search_skill">
+                    </div>
+                    <div class="input-group col-auto">
+                        <div class="input-group-text">Location</div>
+                        <input type="text" class="form-control" name="search_location">
+                    </div>
+                    <div class="input-group col-auto">
+                        <div class="input-group-text">Salary</div>
+                        <input type="text" class="form-control" name="search_salary">
+                    </div>
+                    <div class="input-group col-auto">
+                        <div class="input-group-text">Remote</div>
+                        <input type="text" class="form-control" name="search_remote">
+                    </div>
+                    <div class="input-group col-auto">
+                        <div class="input-group-text">Visa</div>
+                        <input type="text" class="form-control" name="search_visa">
+                    </div>
+                </div>
+                <div class="col-auto">
+                    <button class="btn bg-dark text-white" type="submit">Keyword Search</button>
+                </div>
+            </div>
+        </form>
         {% for job in jobs %}
         <div class="col-md-6 mb-4">
             <div class="card">
