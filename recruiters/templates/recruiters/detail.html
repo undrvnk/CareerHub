@@ -1,0 +1,185 @@
+{% extends 'base.html' %}
+{% load custom_tags %}
+
+{% block content %}
+<div class="container mt-5">
+    <style>
+    /* Applicant card styles */
+    .card.mb-2.p-2.selected {
+        outline: 3px solid #0d6efd;
+        box-shadow: 0 0 0 3px rgba(13,110,253,0.15);
+    }
+    .card.mb-2.p-2:focus {
+        outline: 2px dashed #6c757d;
+    }
+
+    /* Stage container styles */
+    .stage-container {
+        min-height: 200px;
+        border: 1px dashed #dee2e6;
+        border-radius: 0.5rem;
+        padding: 0.75rem;
+        background-color: #f8f9fa;
+    }
+    .stage-container.drag-over {
+        background: rgba(13,110,253,0.05);
+        border-color: #0d6efd;
+    }
+    </style>
+
+    <!-- Job Details -->
+    <h1>{{ post.title }}</h1>
+    <h5 class="text-muted">{{ post.company }}</h5>
+    <p>{{ post.description }}</p>
+    <p>Location: {{ post.location }}</p>
+    <p>Salary: {{ post.salary_range }}</p>
+
+    {% if user.is_authenticated and user == post.recruiter %}
+        <a class="btn btn-primary" href="{% url 'recruiters.edit' id=post.id %}">Edit</a>
+        <a class="btn btn-danger" href="{% url 'recruiters.delete' id=post.id %}">Delete</a>
+    {% endif %}
+
+    <hr>
+
+    <!-- Applicant Pipeline / Kanban -->
+    <h3>Applicant Pipeline</h3>
+    <div class="row">
+        {% for stage, entries in applicants_by_stage_list %}
+        <div class="col-md-3">
+            <h5>{{ stage|capfirst }}</h5>
+            <div class="stage-container" data-stage="{{ stage }}">
+                {% if entries %}
+                    {% for e in entries %}
+                        <div class="card mb-2 p-2"
+                             data-username="{{ e.username }}"
+                             data-applicant-id="{{ e.applicant_id|default:'' }}"
+                             tabindex="0">
+                            <span class="username">{{ e.username }}</span>
+                            <br>
+                            <small class="text-muted">{{ e.created_at|date:"M d, Y" }}</small>
+                            <br>
+                            <small class="text-muted">source: {{ e.source }} — status: {{ e.status }}</small>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted">No applicants</p>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+console.log("✅ detail.html JS loaded");
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log("✅ DOM fully loaded");
+
+    // Draggable applicant cards
+    document.querySelectorAll('.card.mb-2.p-2').forEach(function(card) {
+        card.setAttribute('draggable', 'true');
+        card.addEventListener('dragstart', function(e) {
+            const username = card.dataset.username || card.querySelector('.username')?.innerText || '';
+            const applicantId = card.dataset.applicantId || '';
+            e.dataTransfer.setData('text/plain', JSON.stringify({username: username, applicant_id: applicantId}));
+            card.classList.add('dragging');
+            console.log("Drag started:", {username, applicantId});
+        });
+        card.addEventListener('dragend', function() {
+            card.classList.remove('dragging');
+            console.log("Drag ended");
+        });
+        card.addEventListener('click', function() {
+            document.querySelectorAll('.card.mb-2.p-2.selected').forEach(function(c){ c.classList.remove('selected'); });
+            card.classList.add('selected');
+            console.log("Card selected:", {username: card.dataset.username, applicantId: card.dataset.applicantId});
+        });
+    });
+
+    // Stage containers
+    document.querySelectorAll('.stage-container').forEach(function(container) {
+        container.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            container.classList.add('drag-over');
+        });
+        container.addEventListener('dragleave', function() {
+            container.classList.remove('drag-over');
+        });
+        container.addEventListener('drop', function(e) {
+            e.preventDefault();
+            container.classList.remove('drag-over');
+            const data = JSON.parse(e.dataTransfer.getData('text/plain'));
+            const target_stage = container.dataset.stage;
+            console.log("Drop detected:", data, "→ target:", target_stage);
+            moveApplication(data, target_stage);
+            const dragging = document.querySelector('.dragging');
+            if (dragging) {
+                container.appendChild(dragging);
+            }
+        });
+
+        // Click-to-move
+        container.addEventListener('click', function(e) {
+            if (e.target.closest('.card.mb-2.p-2')) return;
+            const selected = document.querySelector('.card.mb-2.p-2.selected');
+            if (!selected) return;
+            const username = selected.dataset.username || selected.querySelector('.username')?.innerText || '';
+            const applicantId = selected.dataset.applicantId || '';
+            const target_stage = container.dataset.stage;
+            console.log("Click-to-move:", {username, applicantId}, "→ target:", target_stage);
+            moveApplication({username: username, applicant_id: applicantId}, target_stage);
+            container.appendChild(selected);
+            selected.classList.remove('selected');
+        });
+    });
+
+    function moveApplication(data, target_stage) {
+        const csrftoken = getCookie('csrftoken');
+        const form = new FormData();
+        form.append('post_id', '{{ post.id }}');
+        if (data.applicant_id) form.append('applicant_id', data.applicant_id);
+        if (data.username) form.append('username', data.username);
+        form.append('target_stage', target_stage);
+
+        console.log("⬆️ Sending moveApplication:", Object.fromEntries(form));
+
+        fetch("{% url 'recruiters.move_application' %}", {
+            method: 'POST',
+            headers: {'X-CSRFToken': csrftoken},
+            body: form,
+        })
+        .then(r => r.json())
+        .then(resp => {
+            console.log("⬇️ Server response:", resp);
+            if (!resp.ok) {
+                alert('Move failed: ' + (resp.error || 'unknown'));
+                location.reload();
+            }
+        })
+        .catch(err => {
+            console.error("❌ Fetch error:", err);
+            alert('Move error');
+            location.reload();
+        });
+    }
+});
+</script>
+{% endblock %}

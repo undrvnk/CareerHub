@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1>Candidates</h1>
+    <div class="row mt-4">
+        <form method="GET">
+            <div class="row">
+                <div class="col-auto">
+                    <div class="input-group col-auto">
+                        <div class="input-group-text">Name</div>
+                        <input type="text" class="form-control" name="search_name">
+                    </div>
+                    <div class="input-group col-auto">
+                        <div class="input-group-text">Skill</div>
+                        <input type="text" class="form-control" name="search_skill">
+                    </div>
+                    <div class="input-group col-auto">
+                        <div class="input-group-text">Education</div>
+                        <input type="text" class="form-control" name="search_education">
+                    </div>
+                    <div class="input-group col-auto">
+                        <div class="input-group-text">Experience</div>
+                        <input type="text" class="form-control" name="search_experience">
+                    </div>
+                </div>
+                <div class="col-auto">
+                    <button class="btn bg-dark text-white" type="submit">Keyword Search</button>
+                </div>
+            </div>
+        </form>
+        {% for profile in candidates %}
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    {% if profile.user %}
+                        <h5 class="card-title">{{ profile.user.last_name }}, {{profile.user.first_name }}</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">{{ profile.headline }}</h6>
+                    {% endif %}
+                    <p class="card-text"><u>Education:</u> {{ profile.education|linebreaks }}</p>
+                    <p class="card-text"><u>GPA:</u> {{ profile.gpa }}</p>
+                    <p class="card-text"><u>Work Experience:</u> {{ profile.work_experience|linebreaks }}</p>
+                    <p class="card-text"><u>Skills:</u>
+                    {% for skill in profile.skills.all %}
+                        <br>{{ skill.name }}
+                    {% endfor %}
+                    </p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

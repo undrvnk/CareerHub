@@ -1,29 +1,38 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from .models import Post#, Application
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from django.contrib.auth import get_user_model
+
+from .models import Post, Applicant
+from jobs.models import Application as JobApplication
+
+
+from profiles.models import Profile
 
 def index(request):
     posts = Post.objects.all().order_by('-created_at')
     return render(request, 'recruiters/index.html', {'posts': posts})
 
+
 @login_required
 def create(request):
-    if not request.user.role == "recruiter":
+    if request.user.role != "recruiter":
         return redirect('recruiters.index')
-    
+
     if request.method == 'POST':
-        post = Post()
-        post.title = request.POST['title']
-        post.company = request.POST['company']
-        post.description = request.POST['description']
-        post.location = request.POST['location']
-        post.salary_range = request.POST['salary_range']
-        post.recruiter = request.user
+        post = Post(
+            title=request.POST['title'],
+            company=request.POST['company'],
+            description=request.POST['description'],
+            location=request.POST['location'],
+            salary_range=request.POST['salary_range'],
+            recruiter=request.user,
+        )
         post.save()
-        
-        # FIX: Redirect to the index page after successful creation
-        return redirect('recruiters.index') 
-    
+        posts = Post.objects.all().order_by('-created_at')
+        return render(request, 'recruiters/index.html', {'posts': posts})
+
     return render(request, 'recruiters/create.html')
 
 # @login_required
@@ -33,24 +42,34 @@ def create(request):
 #     applications = Application.objects.filter(applicant=request.user)
 #     return render(request, 'jobs/applications.html', {'applications': applications})
 
+@login_required
+def candidates(request):
+    name_term = request.GET.get('search_name')
+    skill_term = request.GET.get('search_skill')
+    education_term = request.GET.get('search_education')
+    experience_term = request.GET.get('search_experience')
+    if name_term or skill_term or education_term or experience_term:
+        candidates = Profile.objects.filter(user__first_name__contains=name_term) | Profile.objects.filter(user__last_name__contains=name_term)
+        candidates = candidates.filter(education__contains=education_term).filter(work_experience__contains=experience_term)
+        if (skill_term):
+            candidates = candidates.filter(skills__name__contains=skill_term)
+    else:
+        candidates = Profile.objects.all().order_by('-created_at')
+    #candidates = Profile.objects.all().order_by('-created_at')
+    return render(request, 'recruiters/candidates.html', {'candidates': candidates})
+
 def detail(request, job_id):
     post = get_object_or_404(Post, pk=job_id)
     return render(request, 'posts/detail.html', {'post': post})
 
 @login_required
 def edit(request, id):
-    if not request.user.role == "recruiter":
-        return redirect('post.index')
+    if request.user.role != "recruiter":
+        return redirect('recruiters.index')
+
     post = get_object_or_404(Post, pk=id)
-    if request.method == 'GET':
 
-        post = Post.objects.get(id=id)
-        return render(request, 'recruiters/edit.html',
-
-            {'posts': post})
     if request.method == 'POST':
-        # Handle job edit form submission
-        post = Post.objects.get(id=id)
         post.title = request.POST['title']
         post.company = request.POST['company']
         post.description = request.POST['description']
@@ -58,15 +77,113 @@ def edit(request, id):
         post.salary_range = request.POST['salary_range']
         post.recruiter = request.user
         post.save()
-        return render(request, 'recruiters/create.html', {'posts': post})
-    return render(request, 'posts/edit.html', {'post': post})
+        posts = Post.objects.all().order_by('-created_at')
+        return render(request, 'recruiters/index.html', {'posts': posts})
+
+    return render(request, 'recruiters/edit.html', {'post': post})
+
 
 @login_required
-def delete(request, post_id):
-    if not request.user.role == "recruiter":
-        return redirect('post.index')
-    post = get_object_or_404(Post, pk=post_id)
-    if request.method == 'POST':
-        post.delete()
-        return redirect('posts.index')
-    return render(request, 'posts/delete.html', {'post': post})
+def delete(request, id):
+    if request.user.role != "recruiter":
+        return redirect('recruiters.index')
+
+    post = get_object_or_404(Post, pk=id)
+    post.delete()
+    return redirect('recruiters.index')
+
+
+@login_required
+def detail(request, id):
+    post = get_object_or_404(Post, id=id)
+
+    applicants = Applicant.objects.filter(post=post).order_by('-applied_at')
+    job_applications = JobApplication.objects.filter(post=post).order_by('-created_at')
+
+    stages = ['applied', 'interview', 'offer', 'hired']
+    unified = {stage: [] for stage in stages}
+
+    for a in applicants:
+        entry = {
+            'username': a.name,
+            'status': a.stage,
+            'created_at': a.applied_at,
+            'applicant_id': a.id,
+            'source': 'recruiter',
+        }
+        key = a.stage.lower()
+        unified.setdefault(key, []).append(entry)
+
+    for app in job_applications:
+        key = (app.status or '').lower()
+        entry = {
+            'username': getattr(app.applicant, 'username', str(app.applicant)),
+            'status': app.status,
+            'created_at': app.created_at,
+            'applicant_id': getattr(app.applicant, 'id', None),
+            'source': 'job',
+        }
+        if key in unified:
+            unified[key].append(entry)
+        else:
+            unified['applied'].append(entry)
+
+    applicants_by_stage_list = [(stage, unified.get(stage, [])) for stage in stages]
+
+    return render(request, 'recruiters/detail.html', {
+        'post': post,
+        'stages': stages,
+        'applicants_by_stage_list': applicants_by_stage_list,
+    })
+
+
+@login_required
+@require_POST
+def move_application(request):
+    post_id = request.POST.get('post_id')
+    target = request.POST.get('target_stage')
+    username = request.POST.get('username')
+    applicant_id = request.POST.get('applicant_id')
+
+    if not post_id or not target:
+        return JsonResponse({'ok': False, 'error': 'missing post_id or target_stage'}, status=400)
+
+    post = get_object_or_404(Post, id=post_id)
+
+    user = None
+    if applicant_id:
+        User = get_user_model()
+        try:
+            user = User.objects.get(id=applicant_id)
+        except User.DoesNotExist:
+            pass
+
+    if not user and username:
+        User = get_user_model()
+        try:
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            pass
+
+    if user:
+        job_app = JobApplication.objects.filter(post=post, applicant=user).first()
+        if job_app:
+            job_app.status = target.capitalize()
+            job_app.save()
+            return JsonResponse({'ok': True})
+
+    # fallback: recruiters.Applicant
+    if applicant_id:
+        appq = Applicant.objects.filter(post=post, id=applicant_id)
+    elif username:
+        appq = Applicant.objects.filter(post=post, name=username)
+    else:
+        appq = Applicant.objects.none()
+
+    if appq.exists():
+        a = appq.first()
+        a.stage = target.lower()
+        a.save()
+        return JsonResponse({'ok': True})
+
+    return JsonResponse({'ok': False, 'error': 'application not found'}, status=404)

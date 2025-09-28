@@ -13,6 +13,11 @@
                     <p class="card-text">{{ post.description|truncatewords:30 }}</p>
             {% if user.is_authenticated and user == post.recruiter %}
 
+            <a class="btn btn-info"
+                       href="{% url 'recruiters.detail' id=post.id %}">
+                       View
+                    </a>
+
             <a class="btn btn-primary"
 
               href="{% url 'recruiters.edit' id=post.id %}">Edit
