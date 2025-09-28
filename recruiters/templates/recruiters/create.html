@@ -31,11 +31,21 @@
   <label for="salary_range">Salary Range:</label>
   <input type="text" name="salary_range" required class="form-control" id="salary_range" value="{{ template_data.post.salary_range }}">
 </p>
-<!-- un-comment this once someone figures out how to make this a drop-down for the yes/no options
+
+<p>
+  <label for="required_skills">Required Skills (comma-separated):</label>
+  <input type="text" name="required_skills" required class="form-control" 
+         id="required_skills" value="{% if template_data.skills %}{{ template_data.skills|join:", " }}{% endif %}">
+</p>
+
 <p>
   <label for="visa_sponsorship">Visa Sponsorship:</label>
-  <input type="text" name="visa_sponsorship" required class="form-control" id="salary_range" value="{{ template_data.post.visa_sponsorship }}">
-</p>-->
+  <select name="visa_sponsorship" id="visa_sponsorship" class="form-control" required>
+    <option value="yes" {% if template_data.post.visa_sponsorship == "yes" %}selected{% endif %}>Yes</option>
+    <option value="no" {% if template_data.post.visa_sponsorship == "no" %}selected{% endif %}>No</option>
+  </select>
+</p>
+
 
                 <button type="submit" class="btn btn-primary">Post Job</button>
             </form>

@@ -6,6 +6,7 @@ from django.contrib.auth import get_user_model
 
 from .models import Post, Applicant
 from jobs.models import Application as JobApplication
+from profiles.models import Skill
 
 
 from profiles.models import Profile
@@ -27,15 +28,22 @@ def create(request):
             description=request.POST['description'],
             location=request.POST['location'],
             salary_range=request.POST['salary_range'],
-            #visa_sponsorship=request.POST['visa_sponsorship'],
-            visa_sponsorship='N/A', #delete this line after fixing visa sponsorship input form
+            visa_sponsorship=request.POST['visa_sponsorship'],
             recruiter=request.user,
         )
         post.save()
+
+        skills_input = request.POST.get("required_skills", "")
+        skills = [s.strip() for s in skills_input.split(",") if s.strip()]
+        for skill_name in skills:
+            skill, _ = Skill.objects.get_or_create(name=skill_name)
+            post.required_skills.add(skill)
+
         posts = Post.objects.all().order_by('-created_at')
         return render(request, 'recruiters/index.html', {'posts': posts})
 
     return render(request, 'recruiters/create.html')
+
 
 # @login_required
 # def applications(request):
