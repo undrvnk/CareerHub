@@ -6,6 +6,10 @@ from django.contrib import messages
 from django.core.mail import send_mail
 from django.conf import settings
 from django.http import HttpResponseBadRequest
+import smtplib
+import ssl
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 from .models import Post, Applicant
 from jobs.models import Application as JobApplication
@@ -21,11 +25,8 @@ def index(request):
 @login_required
 @require_POST
 def email_candidate(request):
-    """
-    Handles sending an email to a candidate whose profile is being viewed.
-    The candidate can be a User (JobApplication) or a direct Applicant.
-    """
     if request.user.role != "recruiter":
+        print('not recruiter')
         messages.error(request, "Access denied. Only recruiters can email candidates.")
         return redirect('recruiters.index')
 
@@ -33,13 +34,16 @@ def email_candidate(request):
     candidate_email = request.POST.get('candidate_email')
     subject = request.POST.get('subject')
     message_body = request.POST.get('message_body')
+    recruiter_email = request.POST.get('recruiter_email')
+    email_password = request.POST.get('email_password')
     # Get redirect URL from hidden field
     redirect_url = request.POST.get('redirect_url', request.META.get('HTTP_REFERER', '/'))
 
     if not all([candidate_email, subject, message_body]):
+        print('missing fields')
         messages.error(request, "Missing fields: Email, Subject, and Message Body are required.")
         return redirect(redirect_url)
-
+    
     # Simple email validation check (for safety)
     if '@' not in candidate_email or '.' not in candidate_email:
         messages.error(request, "Invalid candidate email address.")
@@ -48,18 +52,20 @@ def email_candidate(request):
     try:
         # Construct the email body, including recruiter's details
         recruiter_name = f"{request.user.first_name} {request.user.last_name}"
-        recruiter_contact = request.user.email
-        full_message = f"Dear Candidate,\n\n{message_body}\n\n---\nBest regards,\n{recruiter_name}\nRecruiter at {request.user.company_name or 'CareerHub'}\nContact: {recruiter_contact}"
-
-        send_mail(
-            subject=subject,
-            message=full_message,
-            from_email=settings.DEFAULT_FROM_EMAIL, # Should be configured in settings.py
-            recipient_list=[candidate_email],
-            fail_silently=False,
-        )
+        full_message = f"Dear Candidate,\n\n{message_body}\n\n---\nBest regards,\n{recruiter_name}\nContact: {recruiter_email}"
+        msg = MIMEMultipart()
+        msg['From'] = recruiter_email
+        msg['To'] = candidate_email
+        msg['Subject'] = subject
+        msg.attach(MIMEText(full_message, 'plain'))
+        with smtplib.SMTP('smtp.gmail.com', 587) as server:
+            server.starttls(context=ssl.create_default_context())
+            server.login(recruiter_email, email_password)
+            server.send_message(msg)
+        print("Success")
         messages.success(request, f"Email sent successfully to {candidate_email}!")
     except Exception as e:
+        print(e)
         messages.error(request, f"Failed to send email: {e}")
 
     return redirect(redirect_url)
