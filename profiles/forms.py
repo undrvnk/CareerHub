@@ -3,6 +3,15 @@ from django import forms
 from .models import Profile, Skill
 
 class ProfileForm(forms.ModelForm):
+    email = forms.EmailField(
+        required=True,
+        label='Email Address (for Recruiters to contact you)',
+        widget=forms.EmailInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'your.email@example.com'
+        })
+    )
+    
     # Custom field for skills input
     skills_input = forms.CharField(
         required=False,

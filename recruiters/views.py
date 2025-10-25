@@ -1,20 +1,68 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
 from django.views.decorators.http import require_POST
-from django.contrib.auth import get_user_model
+from django.contrib import messages
+# Import for emailing
+from django.core.mail import send_mail
+from django.conf import settings
+from django.http import HttpResponseBadRequest
 
 from .models import Post, Applicant
 from jobs.models import Application as JobApplication
 from profiles.models import Skill
-
-
 from profiles.models import Profile
+from accounts.models import User as UserAccount
 
 def index(request):
     posts = Post.objects.all().order_by('-created_at')
     return render(request, 'recruiters/index.html', {'posts': posts})
 
+
+@login_required
+@require_POST
+def email_candidate(request):
+    """
+    Handles sending an email to a candidate whose profile is being viewed.
+    The candidate can be a User (JobApplication) or a direct Applicant.
+    """
+    if request.user.role != "recruiter":
+        messages.error(request, "Access denied. Only recruiters can email candidates.")
+        return redirect('recruiters.index')
+
+    # Get data from the POST request
+    candidate_email = request.POST.get('candidate_email')
+    subject = request.POST.get('subject')
+    message_body = request.POST.get('message_body')
+    # Get redirect URL from hidden field
+    redirect_url = request.POST.get('redirect_url', request.META.get('HTTP_REFERER', '/'))
+
+    if not all([candidate_email, subject, message_body]):
+        messages.error(request, "Missing fields: Email, Subject, and Message Body are required.")
+        return redirect(redirect_url)
+
+    # Simple email validation check (for safety)
+    if '@' not in candidate_email or '.' not in candidate_email:
+        messages.error(request, "Invalid candidate email address.")
+        return redirect(redirect_url)
+
+    try:
+        # Construct the email body, including recruiter's details
+        recruiter_name = f"{request.user.first_name} {request.user.last_name}"
+        recruiter_contact = request.user.email
+        full_message = f"Dear Candidate,\n\n{message_body}\n\n---\nBest regards,\n{recruiter_name}\nRecruiter at {request.user.company_name or 'CareerHub'}\nContact: {recruiter_contact}"
+
+        send_mail(
+            subject=subject,
+            message=full_message,
+            from_email=settings.DEFAULT_FROM_EMAIL, # Should be configured in settings.py
+            recipient_list=[candidate_email],
+            fail_silently=False,
+        )
+        messages.success(request, f"Email sent successfully to {candidate_email}!")
+    except Exception as e:
+        messages.error(request, f"Failed to send email: {e}")
+
+    return redirect(redirect_url)
 
 @login_required
 def create(request):
