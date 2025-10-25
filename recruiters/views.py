@@ -207,3 +207,78 @@ def move_application(request):
         return JsonResponse({'ok': True})
 
     return JsonResponse({'ok': False, 'error': 'application not found'}, status=404)
+
+
+@login_required
+def recommendations(request):
+    """
+    Recommends candidates for the recruiter's job postings based on skill match.
+    Excludes candidates who have already applied to the specific job.
+    """
+    if request.user.role != "recruiter":
+        return redirect('jobs.index')
+    
+    # Get all job postings by this recruiter
+    my_posts = Post.objects.filter(recruiter=request.user)
+    
+    if not my_posts.exists():
+        return render(request, 'recruiters/recommendations.html', {'recommendations': []})
+    
+    # Get all candidates with profiles
+    candidates = Profile.objects.select_related('user').prefetch_related('skills').all()
+    
+    recommendations = []
+    
+    for candidate in candidates:
+        candidate_skills = set(candidate.skills.all())
+        if not candidate_skills:
+            continue  # Skip candidates without skills
+        
+        # Find best matching job for this candidate
+        best_match = None
+        best_match_data = None
+        
+        for post in my_posts:
+            # Check if candidate has already applied to this specific job
+            has_applied = JobApplication.objects.filter(
+                job=post, 
+                applicant=candidate.user
+            ).exists()
+            
+            if has_applied:
+                continue  # Skip this job for this candidate
+            
+            post_skills = set(post.required_skills.all())
+            if not post_skills:
+                continue  # Skip jobs without required skills
+            
+            matched_skills = candidate_skills.intersection(post_skills)
+            if matched_skills:  # Only consider if there's at least one skill match
+                match_count = len(matched_skills)
+                match_percentage = (match_count / len(post_skills)) * 100
+                
+                # Keep track of the best match for this candidate
+                if best_match is None or match_percentage > best_match_data['match_percentage']:
+                    best_match = post
+                    best_match_data = {
+                        'job': post,
+                        'matched_skills': matched_skills,
+                        'match_count': match_count,
+                        'match_percentage': match_percentage,
+                        'total_required': len(post_skills)
+                    }
+        
+        # Add candidate if they have at least one matching job
+        if best_match_data:
+            recommendations.append({
+                'candidate': candidate,
+                'best_match': best_match_data
+            })
+    
+    # Sort by match percentage (highest first), then by match count
+    recommendations.sort(
+        key=lambda x: (x['best_match']['match_percentage'], x['best_match']['match_count']), 
+        reverse=True
+    )
+    
+    return render(request, 'recruiters/recommendations.html', {'recommendations': recommendations})

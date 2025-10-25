@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1>Recommended Candidates</h1>
+    <p class="text-muted">Candidates are ranked by their best skill match across all your job postings</p>
+    
+    {% if messages %}
+        <div class="mt-3">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    
+    <div class="row mt-4">
+        {% if recommendations %}
+            {% for rec in recommendations %}
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <h5 class="card-title">{{ rec.candidate.user.first_name }} {{ rec.candidate.user.last_name }}</h5>
+                                <h6 class="card-subtitle mb-2 text-muted">{{ rec.candidate.headline }}</h6>
+                            </div>
+                            <span class="badge bg-success">{{ rec.best_match.match_percentage|floatformat:0 }}% Match</span>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <strong>Best Match:</strong> {{ rec.best_match.job.title }} at {{ rec.best_match.job.company }}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <strong>Matched Skills ({{ rec.best_match.match_count }}/{{ rec.best_match.total_required }}):</strong>
+                            <div class="mt-2">
+                                {% for skill in rec.best_match.matched_skills %}
+                                    <span class="badge bg-primary me-1">{{ skill.name }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <strong>Education:</strong>
+                            <p class="card-text">{{ rec.candidate.education|truncatewords:20 }}</p>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <strong>Work Experience:</strong>
+                            <p class="card-text">{{ rec.candidate.work_experience|truncatewords:20 }}</p>
+                        </div>
+                        
+                        <a href="{% url 'recruiters.detail' rec.best_match.job.id %}" class="btn btn-primary me-2">View Job Posting</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12">
+                <div class="alert alert-info">
+                    <h5>No recommendations found</h5>
+                    <p>
+                        {% if not user.post_set.exists %}
+                            You don't have any job postings yet. Create a job posting to get candidate recommendations.
+                            <br><br>
+                            <a href="{% url 'recruiters.create' %}" class="btn btn-primary">Create Job Posting</a>
+                        {% else %}
+                            We couldn't find any candidates matching your job requirements. Check back later as more candidates join the platform.
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -44,9 +44,11 @@
               {% if user.role == "recruiter" %}
                 <a class="nav-link" href="{% url 'recruiters.index' %}">Postings</a>
                 <a class="nav-link" href="{% url 'recruiters.create' %}">Post Job</a>
+                <a class="nav-link" href="{% url 'recruiters.recommendations' %}">Recommendations</a>
                 <a class="nav-link" href="{% url 'recruiters.candidates' %}">Browse Candidates</a>
               {% else %}
                 <a class="nav-link" href="{% url 'profiles.view' %}">Profile</a>
+                <a class="nav-link" href="{% url 'jobs.recommendations' %}">Recommendations</a>
                 <a class="nav-link" href="{% url 'jobs.applications' %}">Applications</a>
               {% endif %}
               <a class="nav-link" href="{% url 'accounts.logout' %}">Logout ({{user.username }})</a>

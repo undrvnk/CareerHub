@@ -98,6 +98,58 @@ def delete(request, job_id):
     return render(request, 'jobs/delete.html', {'job': job})
 
 # View all applications for a job (recruiter view)
+
+# Recommendations for job seekers based on skills
+@login_required
+def recommendations(request):
+    if request.user.role == "recruiter":
+        return redirect('recruiters.index')
+    
+    # Get user's profile and skills
+    try:
+        profile = request.user.profile
+        user_skills = set(profile.skills.all())
+    except:
+        # If user doesn't have a profile, show message
+        messages.info(request, "Please complete your profile to get personalized job recommendations.")
+        return render(request, 'jobs/recommendations.html', {'jobs': []})
+    
+    if not user_skills:
+        messages.info(request, "Please add skills to your profile to get personalized job recommendations.")
+        return render(request, 'jobs/recommendations.html', {'jobs': []})
+    
+    # Get all jobs and calculate skill matches
+    all_jobs = Post.objects.all()
+    
+    # Get jobs the user has already applied for
+    applied_job_ids = Application.objects.filter(applicant=request.user).values_list('job_id', flat=True)
+    
+    job_matches = []
+    
+    for job in all_jobs:
+        # Skip jobs the user has already applied for
+        if job.id in applied_job_ids:
+            continue
+            
+        job_skills = set(job.required_skills.all())
+        if job_skills:  # Only consider jobs with required skills
+            matched_skills = user_skills.intersection(job_skills)
+            if matched_skills:  # Only show jobs with at least one skill match
+                match_count = len(matched_skills)
+                match_percentage = (match_count / len(job_skills)) * 100
+                job_matches.append({
+                    'job': job,
+                    'matched_skills': matched_skills,
+                    'match_count': match_count,
+                    'match_percentage': match_percentage,
+                    'total_required': len(job_skills)
+                })
+    
+    # Sort by match percentage (highest first), then by match count
+    job_matches.sort(key=lambda x: (x['match_percentage'], x['match_count']), reverse=True)
+    
+    return render(request, 'jobs/recommendations.html', {'job_matches': job_matches})
+
 @login_required
 def view_applications(request, job_id):
     if request.user.role != "recruiter":
