@@ -31,6 +31,10 @@ def create(request):
             visa_sponsorship=request.POST['visa_sponsorship'],
             recruiter=request.user,
         )
+        lat = request.POST.get('lat')
+        lng = request.POST.get('lng')
+        post.lat = float(lat) if lat else None
+        post.lng = float(lng) if lng else None
         post.save()
 
         skills_input = request.POST.get("required_skills", "")
@@ -84,6 +88,10 @@ def edit(request, id):
         post.company = request.POST['company']
         post.description = request.POST['description']
         post.location = request.POST['location']
+        lat = request.POST.get('lat')
+        lng = request.POST.get('lng')
+        post.lat = float(lat) if lat else None
+        post.lng = float(lng) if lng else None
         post.salary_range = request.POST['salary_range']
         post.recruiter = request.user
         post.save()

@@ -1,64 +1,116 @@
 {% extends 'base.html' %}
-
 {% block content %}
-
 <div class="p-3">
-
   <div class="container">
-
     <div class="row mt-3">
-
       <div class="col mx-auto mb-3">
-
         <h2>Edit Post</h2>
-
         <hr />
 
         <form method="POST">
-
           {% csrf_token %}
 
           <p>
-  <label for="title">Title:</label>
-  <input type="text" name="title" required class="form-control" id="title" value="{{ template_data.post.title }}">
-</p>
+            <label for="title">Title:</label>
+            <input type="text" name="title" required class="form-control" id="title" value="{{ post.title }}">
+          </p>
 
-<p>
-  <label for="company">Company:</label>
-  <input type="text" name="company" required class="form-control" id="company" value="{{ template_data.post.company }}">
-</p>
+          <p>
+            <label for="company">Company:</label>
+            <input type="text" name="company" required class="form-control" id="company" value="{{ post.company }}">
+          </p>
 
-<p>
-  <label for="description">Description:</label>
-  <textarea name="description" required class="form-control" id="description">{{ template_data.post.description }}</textarea>
-</p>
+          <p>
+            <label for="description">Description:</label>
+            <textarea name="description" required class="form-control" id="description">{{ post.description }}</textarea>
+          </p>
 
-<p>
-  <label for="location">Location:</label>
-  <input type="text" name="location" required class="form-control" id="location" value="{{ template_data.post.location }}">
-</p>
+          <p>
+            <label for="location">Location (address):</label>
+            <div class="input-group">
+              <input type="text" name="location" required class="form-control" id="location" value="{{ post.location }}">
+              <button id="geocodeBtn" class="btn btn-outline-secondary" type="button">Find on map</button>
+            </div>
+            <small class="text-muted">Type the address, click “Find on map”, then drag the pin if needed.</small>
+          </p>
 
-<p>
-  <label for="salary_range">Salary Range:</label>
-  <input type="text" name="salary_range" required class="form-control" id="salary_range" value="{{ template_data.post.salary_range }}">
-</p>
+          <!-- NEW: hidden lat/lng -->
+          <input type="hidden" name="lat" id="id_lat" value="{{ post.lat|default_if_none:'' }}">
+          <input type="hidden" name="lng" id="id_lng" value="{{ post.lng|default_if_none:'' }}">
 
-          <div class="text-start">
-
-            <button type="submit" class="btn bg-dark text-white">Edit Review
-
-            </button>
-
+          <div class="mb-3">
+            <div id="map" class="w-100 rounded border" style="height:50vh;"></div>
           </div>
 
+          <p>
+            <label for="salary_range">Salary Range:</label>
+            <input type="text" name="salary_range" required class="form-control" id="salary_range" value="{{ post.salary_range }}">
+          </p>
+
+          <p>
+            <label for="visa_sponsorship">Visa Sponsorship:</label>
+            <input type="text" name="visa_sponsorship" class="form-control" id="visa_sponsorship" value="{{ post.visa_sponsorship }}">
+          </p>
+
+          <div class="text-start">
+            <button type="submit" class="btn bg-dark text-white">Save</button>
+          </div>
         </form>
 
       </div>
-
     </div>
-
   </div>
-
 </div>
 
+<!-- Leaflet CSS/JS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+  const latInput = document.getElementById("id_lat");
+  const lngInput = document.getElementById("id_lng");
+  const addrInput = document.getElementById("location");
+
+  const startLat = latInput.value ? parseFloat(latInput.value) : 39.8;
+  const startLng = lngInput.value ? parseFloat(lngInput.value) : -98.6;
+  const startZoom = (latInput.value && lngInput.value) ? 14 : 4;
+
+  const map = L.map('map').setView([startLat, startLng], startZoom);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19, attribution: '&copy; OpenStreetMap'
+  }).addTo(map);
+
+  let marker = L.marker([startLat, startLng], {draggable: true}).addTo(map);
+
+  function syncHidden(ll) {
+    latInput.value = ll.lat.toFixed(6);
+    lngInput.value = ll.lng.toFixed(6);
+  }
+  syncHidden(marker.getLatLng());
+
+  marker.on("dragend", () => syncHidden(marker.getLatLng()));
+
+  async function geocode(q) {
+    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}`;
+    const res = await fetch(url, {headers: {'Accept-Language': 'en'}});
+    const data = await res.json();
+    return data && data.length ? {lat: parseFloat(data[0].lat), lon: parseFloat(data[0].lon)} : null;
+  }
+
+  document.getElementById("geocodeBtn").addEventListener("click", async () => {
+    const q = (addrInput.value || "").trim();
+    if (!q) { addrInput.focus(); return; }
+    try {
+      const hit = await geocode(q);
+      if (!hit) { alert("Address not found. Try a fuller address."); return; }
+      const ll = [hit.lat, hit.lon];
+      map.setView(ll, 16);
+      marker.setLatLng(ll);
+      syncHidden(marker.getLatLng());
+    } catch (e) {
+      console.warn(e);
+      alert("Geocoding failed. Please try again.");
+    }
+  });
+</script>
 {% endblock content %}

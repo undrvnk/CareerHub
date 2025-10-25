@@ -13,6 +13,8 @@ class Post(models.Model):
     company = models.CharField(max_length=200)
     description = models.TextField()
     location = models.CharField(max_length=200)
+    lat = models.FloatField(null=True, blank=True)
+    lng = models.FloatField(null=True, blank=True)
     salary_range = models.CharField(max_length=100)
     required_skills = models.ManyToManyField(Skill)
     recruiter = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -24,6 +26,9 @@ class Post(models.Model):
     ]
     visa_sponsorship = models.CharField(max_length=3, choices=VISA_CHOICES, default='no')
     #job = models.OneToOneField(Job, on_delete=models.CASCADE)
+    @property
+    def has_location_pin(self):
+        return self.lat is not None and self.lng is not None
 
 
 
