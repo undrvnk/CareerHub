@@ -44,6 +44,17 @@
                     {% for skill in profile.skills.all %}
                         <br>{{ skill.name }}
                     {% endfor %}
+                    {% if profile.user.email %}
+                    <br><a href="#" class="btn btn-sm btn-outline-primary mt-2"
+                    data-bs-toggle="modal"
+                    data-bs-target="#emailCandidateModal"
+                    data-candidate-email="{{ profile.user.email }}"
+                    data-candidate-name="{{ profile.user.first_name }} {{ profile.user.last_name }}">
+                        Contact Candidate
+                    </a>
+                    {% else %}
+                    <span class="text-muted mt-2 d-block">Email not available for this candidate.</span>
+                    {% endif %}
                     </p>
                 </div>
             </div>
@@ -51,4 +62,54 @@
         {% endfor %}
     </div>
 </div>
+<div class="modal fade" id="emailCandidateModal" tabindex="-1" aria-labelledby="emailCandidateModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="emailCandidateModalLabel">Email <span id="candidateNameSpan">Candidate</span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{% url 'recruiters.email_candidate' %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <input type="hidden" name="candidate_email" id="modalCandidateEmail">
+                    <input type="hidden" name="redirect_url" value="{% url 'recruiters.candidates' %}">
+                    
+                    <div class="mb-3">
+                        <label for="emailSubject" class="form-label">Subject</label>
+                        <input type="text" class="form-control" id="emailSubject" name="subject" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="emailBody" class="form-label">Message</label>
+                        <textarea class="form-control" id="emailBody" name="message_body" rows="6" required placeholder="Type your personalized message here..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Send Email</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const emailModal = document.getElementById('emailCandidateModal');
+        if (emailModal) {
+            emailModal.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget;
+                
+                const email = button.getAttribute('data-candidate-email');
+                const name = button.getAttribute('data-candidate-name');
+
+                const nameSpan = emailModal.querySelector('#candidateNameSpan');
+                const emailInput = emailModal.querySelector('#modalCandidateEmail');
+
+                nameSpan.textContent = name;
+                emailInput.value = email;
+            });
+        }
+    });
+</script>
 {% endblock %}
