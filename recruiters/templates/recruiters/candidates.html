@@ -44,6 +44,9 @@
                     {% for skill in profile.skills.all %}
                         <br>{{ skill.name }}
                     {% endfor %}
+                    <br><a href="{% url 'inbox.compose' profile.user.id%}" class="btn btn-sm btn-outline-primary mt-2">
+                        Send Message
+                    </a>
                     {% if profile.user.email %}
                     <br><a href="#" class="btn btn-sm btn-outline-primary mt-2"
                     data-bs-toggle="modal"
