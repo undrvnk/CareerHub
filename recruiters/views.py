@@ -11,7 +11,7 @@ import ssl
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-from .models import Post, Applicant
+from .models import Post, Applicant, SavedSearch
 from jobs.models import Application as JobApplication
 from profiles.models import Skill
 from profiles.models import Profile
@@ -116,7 +116,8 @@ def candidates(request):
     skill_term = request.GET.get('search_skill')
     education_term = request.GET.get('search_education')
     experience_term = request.GET.get('search_experience')
-    if name_term or skill_term or education_term or experience_term:
+    valid_search = name_term or skill_term or education_term or experience_term
+    if valid_search:
         candidates = Profile.objects.filter(user__first_name__contains=name_term) | Profile.objects.filter(user__last_name__contains=name_term)
         candidates = candidates.filter(education__contains=education_term).filter(work_experience__contains=experience_term)
         if (skill_term):
@@ -124,7 +125,33 @@ def candidates(request):
     else:
         candidates = Profile.objects.all().order_by('-created_at')
     #candidates = Profile.objects.all().order_by('-created_at')
-    return render(request, 'recruiters/candidates.html', {'candidates': candidates})
+
+    results = candidates.__len__
+    search_id = request.GET.get('search_id')
+
+    saved_searches = SavedSearch.objects.filter(user=request.user)
+    for search in saved_searches:
+        search_results = Profile.objects.filter(user__first_name__contains=search.name) | Profile.objects.filter(user__last_name__contains=search.name)
+        search_results = search_results.filter(education__contains=search.education).filter(work_experience__contains=search.experience)
+        if (search.skill):
+            search_results = search_results.filter(skills__name__contains=search.skill)
+        search.new_results = (search_results.count())
+        search.save()
+    
+    if search_id:
+        current_search = SavedSearch.objects.get(id=search_id)
+        current_search.result_count = current_search.new_results
+        current_search.save()
+    return render(request, 'recruiters/candidates.html', {
+        'candidates': candidates,
+        'valid_search': valid_search,
+        'name': name_term,
+        'skill': skill_term,
+        'education': education_term,
+        'experience': experience_term,
+        'results': results,
+        'saved_searches': saved_searches
+    })
 
 def detail(request, job_id):
     post = get_object_or_404(Post, pk=job_id)
@@ -344,3 +371,29 @@ def recommendations(request):
     )
     
     return render(request, 'recruiters/recommendations.html', {'recommendations': recommendations})
+
+@login_required
+def save_search(request):
+    name = request.GET.get('name')
+    skill = request.GET.get('skill')
+    education = request.GET.get('education')
+    experience = request.GET.get('experience')
+    if name or skill or education or experience:
+        saved = SavedSearch(
+            name = name,
+            skill = skill,
+            education = education,
+            experience = experience,
+            user = request.user,
+            result_count = request.GET.get('results'),
+            new_results = request.GET.get('results')
+        )
+        saved.save()
+    return redirect('recruiters.candidates')
+
+@login_required
+def delete_search(request, id):
+    search = SavedSearch.objects.get(id=id)
+    if search.user == request.user:
+        search.delete()
+    return redirect('recruiters.candidates')

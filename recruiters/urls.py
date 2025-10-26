@@ -11,4 +11,6 @@ urlpatterns = [
     path('<int:id>/detail/', views.detail, name='recruiters.detail'),
     path('move-application/', views.move_application, name='recruiters.move_application'),
     path('email-candidate/', views.email_candidate, name='recruiters.email_candidate'),
+    path('save-search/', views.save_search, name='recruiters.save_search'),
+    path('delete-search/<int:id>/', views.delete_search, name='recruiters.delete_search'),
 ]
