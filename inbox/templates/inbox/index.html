@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="p-3 mt-4">
+  <div class="container">
+    <h1>Inbox</h1>
+    <div class="row justify-content-center">
+      <div class="col-md-8">
+        {% for message in inbox %}
+        <div class="card shadow p-3 mb-4 rounded">
+          <div class="card-body">
+            <h2>{{ message.subject }}</h2>
+            <hr />
+            <p>{{ message.body }}</p>
+            <b class="text-muted">From: {{ message.sender }}</b>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}
