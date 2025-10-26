@@ -11,7 +11,10 @@
             <h2>{{ message.subject }}</h2>
             <hr />
             <p>{{ message.body }}</p>
-            <b class="text-muted">From: {{ message.sender }}</b>
+            <b class="text-muted">From: {{ message.sender.last_name }}, {{ message.sender.first_name }}</b>
+            <br><a href="{% url 'inbox.compose' message.sender.id%}" class="btn btn-sm btn-outline-primary mt-2">
+                Reply
+            </a>
           </div>
         </div>
         {% endfor %}

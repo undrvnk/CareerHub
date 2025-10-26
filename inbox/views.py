@@ -17,7 +17,7 @@ def compose(request, id):
         message = Message(
             subject=request.POST['subject'],
             body=request.POST['body'],
-            sender=request.user.first_name + " " + request.user.last_name,
+            sender=request.user,
             receiver=receiver,
         )
         message.save()
