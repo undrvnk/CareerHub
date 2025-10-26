@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import Post, Applicant, PostAdmin, ApplicantAdmin
+from .models import Post, Applicant, PostAdmin, ApplicantAdmin, SavedSearch
 # Register your models here.
 admin.site.register(Post, PostAdmin)
 admin.site.register(Applicant, ApplicantAdmin)
+admin.site.register(SavedSearch)

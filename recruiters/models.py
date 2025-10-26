@@ -83,3 +83,13 @@ class ApplicantAdmin(admin.ModelAdmin):
         response = HttpResponse(f, content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename=applicants.csv'
         return response
+
+class SavedSearch(models.Model):
+    id = models.AutoField(primary_key=True)
+    name = models.TextField()
+    skill = models.TextField()
+    education = models.TextField()
+    experience = models.TextField()
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    result_count = models.IntegerField()
+    new_results = models.IntegerField()

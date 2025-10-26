@@ -1,9 +1,35 @@
 {% extends 'base.html' %}
+{% load custom_tags %}
 
 {% block content %}
 <div class="container mt-5">
     <h1>Candidates</h1>
     <div class="row mt-4">
+        {% if saved_searches %}
+            <h3>Saved Searches</h3>
+            {% for search in saved_searches %}
+            <p>
+                <a href="{% url 'recruiters.candidates' %}?search_name={{search.name}}&search_skill={{search.skill}}&search_education={{search.education}}&search_experience={{search.experience}}&search_id={{search.id}}">
+                    {% if search.name %}
+                        Name: {{search.name}}, 
+                    {% endif %}
+                    {% if search.skill %} 
+                        Skill: {{search.skill}}, 
+                    {% endif %}
+                    {% if search.education %} 
+                        Education: {{search.education}}, 
+                    {% endif %}
+                    {% if search.experience %} 
+                        Experience: {{search.experience}}, 
+                    {% endif %}
+                    {% if search.new_results > search.result_count %}
+                    ({{search.new_results|subtract:search.result_count}} new profile){% endif %}</a>
+                    ---
+                    <a href="{% url 'recruiters.delete_search' search.id %}">Delete</a>
+            </p>
+            {% endfor %}
+        {% endif %}
+        <h3>Keyword Search</h3>
         <form method="GET">
             <div class="row">
                 <div class="col-auto">
@@ -25,7 +51,12 @@
                     </div>
                 </div>
                 <div class="col-auto">
-                    <button class="btn bg-dark text-white" type="submit">Keyword Search</button>
+                    <button class="btn bg-dark text-white" type="submit">Search</button><br><br>
+                    {% if valid_search %}
+                    <a href="{% url 'recruiters.save_search' %}?name={{name}}&skill={{skill}}&education={{education}}&experience={{experience}}&results={{results}}" class="btn bg-dark text-white">
+                        Save Search Inputs
+                    </a>
+                    {% endif %}
                 </div>
             </div>
         </form>
