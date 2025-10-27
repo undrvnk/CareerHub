@@ -17,7 +17,7 @@ class ProfileAdmin(admin.ModelAdmin):
     def download_csv(self, request, queryset):
         f = StringIO()
         meta = self.model._meta
-        field_names = [field.name for field in meta.fields if field.name not in ['id', 'skills', "headline_public", "skills_public", "education_public", "gpa_public", "work_experience_public", "links_public",
+        field_names = [field.name for field in meta.fields if field.name not in ['id', 'skills', "profile_visible", "headline_public", "skills_public", "education_public", "gpa_public", "work_experience_public", "links_public",
               "email_public"]]
         writer = csv.writer(f)
         writer.writerow(['User', 'Headline', 'Educatoin', 'GPA', 'Work Experience', #'Required Skills',

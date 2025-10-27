@@ -16,10 +16,10 @@ class UserAdmin(admin.ModelAdmin):
     def download_csv(self, request, queryset):
         f = StringIO()
         meta = self.model._meta
-        field_names = [field.name for field in meta.fields if field.name not in ['id', "password"]]
+        field_names = [field.name for field in meta.fields if field.name in ['username', 'first_name', 'last_name', 'role', 'email', 
+              'is_staff', 'is_active']]
         writer = csv.writer(f)
-        writer.writerow(['Username', 'First Name', 'Last Name', 'Role', 'Email', 
-                         'Is Staff', 'Is Active', 'Last Login', 'Date Joined'])
+        writer.writerow(['First Name', 'Last Name', 'Email', 'Is Staff', 'Is Active', 'Username', 'Role'])
         for job in queryset:
             writer.writerow([getattr(job, field) for field in field_names])
         f.seek(0)
