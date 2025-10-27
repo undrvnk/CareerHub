@@ -12,7 +12,7 @@ class UserAdmin(admin.ModelAdmin):
     list_filter = ('role', 'is_staff')
     search_fields = ('username', 'first_name', 'last_name')
     ordering = ('username',)
-    ctions = ['download_csv']
+    actions = ['download_csv']
     def download_csv(self, request, queryset):
         f = StringIO()
         meta = self.model._meta
