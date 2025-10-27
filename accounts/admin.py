@@ -24,7 +24,7 @@ class UserAdmin(admin.ModelAdmin):
             writer.writerow([getattr(job, field) for field in field_names])
         f.seek(0)
         response = HttpResponse(f, content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename=posts.csv'
+        response['Content-Disposition'] = 'attachment; filename=users.csv'
         return response
 
 admin.site.register(User, UserAdmin)
