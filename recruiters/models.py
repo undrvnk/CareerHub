@@ -57,7 +57,7 @@ class PostAdmin(admin.ModelAdmin):
     def download_csv(self, request, queryset):
         f = StringIO()
         meta = self.model._meta
-        field_names = [field.name for field in meta.fields if field.name not in ['id', 'required_skills']]
+        field_names = [field.name for field in meta.fields if field.name not in ['id', 'required_skills', "lat", "lng"]]
         writer = csv.writer(f)
         writer.writerow(['Title', 'Company', 'Description', 'Location', 'Salary Range', #'Required Skills',
                     'Recruiter', 'Created At', 'Updated At', 'Visa Sponsorship'])

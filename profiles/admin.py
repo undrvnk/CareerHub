@@ -7,7 +7,9 @@ from io import StringIO
 
 @admin.register(Profile)
 class ProfileAdmin(admin.ModelAdmin):
-    fields = ('user', 'headline', 'education', 'gpa', 'work_experience', 'links', 'skills') # WANT TO INCLUDE DATE CREATED/UPDATED, MAYBE FUTURE
+    fields = ('user', 'headline', 'education', 'gpa', 'work_experience', 'links', 'skills', "profile_visible",
+              "headline_public", "skills_public", "education_public", "gpa_public", "work_experience_public", "links_public",
+              "email_public")
     list_display = ('user', 'headline', 'created_at', 'updated_at')
     search_fields = ('user__username', 'headline')
     list_filter = ('created_at', 'updated_at')
@@ -15,7 +17,8 @@ class ProfileAdmin(admin.ModelAdmin):
     def download_csv(self, request, queryset):
         f = StringIO()
         meta = self.model._meta
-        field_names = [field.name for field in meta.fields if field.name not in ['id', 'skills']]
+        field_names = [field.name for field in meta.fields if field.name not in ['id', 'skills', "headline_public", "skills_public", "education_public", "gpa_public", "work_experience_public", "links_public",
+              "email_public"]]
         writer = csv.writer(f)
         writer.writerow(['User', 'Headline', 'Educatoin', 'GPA', 'Work Experience', #'Required Skills',
                     'Links', 'Created At', 'Updated At'])
