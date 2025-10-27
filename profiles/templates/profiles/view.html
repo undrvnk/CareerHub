@@ -12,27 +12,63 @@
                             <a href="{% url 'profiles.edit' %}" class="btn btn-primary">Edit Profile</a>
                         </div>
                         
-                        <h5 class="text-primary">Headline</h5>
+                        {% if not profile.profile_visible %}
+                        <div class="alert alert-warning">
+                            <i class="fas fa-eye-slash"></i> <strong>Your profile is currently hidden from recruiters.</strong>
+                            <br>Recruiters cannot see your profile in searches, recommendations, or browse listings.
+                            <a href="{% url 'profiles.edit' %}" class="alert-link">Change visibility settings</a>
+                        </div>
+                        {% else %}
+                        <div class="alert alert-success">
+                            <i class="fas fa-eye"></i> <strong>Your profile is visible to recruiters.</strong>
+                        </div>
+                        {% endif %}
+                        
+                        <h5 class="text-primary">
+                            Headline 
+                            {% if not profile.headline_public %}<i class="fas fa-lock text-muted"></i>{% endif %}
+                        </h5>
                         <p class="mb-4">{{ profile.headline }}</p>
 
-                        <h5 class="text-primary">Skills</h5>
+                        <h5 class="text-primary">
+                            Skills 
+                            {% if not profile.skills_public %}<i class="fas fa-lock text-muted"></i>{% endif %}
+                        </h5>
                         <div class="mb-4">
                             {% for skill in profile.skills.all %}
                                 <span class="badge bg-secondary me-2">{{ skill.name }}</span>
                             {% endfor %}
                         </div>
 
-                        <h5 class="text-primary">Education</h5>
+                        <h5 class="text-primary">
+                            Education 
+                            {% if not profile.education_public %}<i class="fas fa-lock text-muted"></i>{% endif %}
+                        </h5>
                         <p class="mb-4">{{ profile.education|linebreaks }}</p>
 
-                        <h5 class="text-primary">GPA</h5>
+                        <h5 class="text-primary">
+                            GPA 
+                            {% if not profile.gpa_public %}<i class="fas fa-lock text-muted"></i>{% endif %}
+                        </h5>
                         <p class="mb-4">{{ profile.gpa|linebreaks }}</p>
 
-                        <h5 class="text-primary">Work Experience</h5>
+                        <h5 class="text-primary">
+                            Work Experience 
+                            {% if not profile.work_experience_public %}<i class="fas fa-lock text-muted"></i>{% endif %}
+                        </h5>
                         <p class="mb-4">{{ profile.work_experience|linebreaks }}</p>
 
-                        <h5 class="text-primary">Links</h5>
-                        <p>{{ profile.links|linebreaks }}</p>
+                        <h5 class="text-primary">
+                            Links 
+                            {% if not profile.links_public %}<i class="fas fa-lock text-muted"></i>{% endif %}
+                        </h5>
+                        <p class="mb-4">{{ profile.links|linebreaks }}</p>
+                        
+                        <h5 class="text-primary">
+                            Email 
+                            {% if not profile.email_public %}<i class="fas fa-lock text-muted"></i>{% endif %}
+                        </h5>
+                        <p>{{ profile.user.email }}</p>
                     </div>
                 </div>
             </div>

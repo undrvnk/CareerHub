@@ -23,7 +23,11 @@ class ProfileForm(forms.ModelForm):
     
     class Meta:
         model = Profile
-        fields = ['headline', 'education', 'work_experience', 'gpa', 'links']
+        fields = [
+            'headline', 'education', 'work_experience', 'gpa', 'links',
+            'profile_visible', 'headline_public', 'skills_public', 'education_public', 
+            'gpa_public', 'work_experience_public', 'links_public', 'email_public'
+        ]
         widgets = {
             'headline': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Briefly describe yourself'}),
             'education': forms.Textarea(attrs={
@@ -42,4 +46,12 @@ class ProfileForm(forms.ModelForm):
                 'rows': 3,
                 'placeholder': 'Add relevant links (GitHub, LinkedIn, Portfolio, etc.)'
             }),
+            'profile_visible': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'headline_public': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'skills_public': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'education_public': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'gpa_public': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'work_experience_public': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'links_public': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'email_public': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }

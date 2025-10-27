@@ -11,8 +11,33 @@
                     <form method="post">
                         {% csrf_token %}
                         
+                        <div class="card mb-4 border-primary">
+                            <div class="card-body bg-light">
+                                <h5 class="card-title">
+                                    <i class="fas fa-eye-slash"></i> Profile Visibility
+                                </h5>
+                                <div class="form-check form-switch">
+                                    {{ form.profile_visible }}
+                                    <label class="form-check-label fw-bold" for="{{ form.profile_visible.id_for_label }}">
+                                        Make my profile visible to recruiters
+                                    </label>
+                                </div>
+                                <small class="text-muted">
+                                    When unchecked, your entire profile will be hidden from all recruiters. You won't appear in searches, recommendations, or browse listings.
+                                </small>
+                            </div>
+                        </div>
+                        
                         <div class="mb-3">
-                            <label for="{{ form.email.id_for_label }}" class="form-label">{{ form.email.label }}</label>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <label for="{{ form.email.id_for_label }}" class="form-label">{{ form.email.label }}</label>
+                                <div class="form-check form-switch">
+                                    {{ form.email_public }}
+                                    <label class="form-check-label" for="{{ form.email_public.id_for_label }}">
+                                        <small>Visible to recruiters</small>
+                                    </label>
+                                </div>
+                            </div>
                             {{ form.email }}
                             {% if form.email.errors %}
                                 <div class="alert alert-danger">{{ form.email.errors }}</div>
@@ -20,7 +45,15 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="{{ form.headline.id_for_label }}" class="form-label">Headline</label>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <label for="{{ form.headline.id_for_label }}" class="form-label">Headline</label>
+                                <div class="form-check form-switch">
+                                    {{ form.headline_public }}
+                                    <label class="form-check-label" for="{{ form.headline_public.id_for_label }}">
+                                        <small>Visible to recruiters</small>
+                                    </label>
+                                </div>
+                            </div>
                             {{ form.headline }}
                             {% if form.headline.errors %}
                                 <div class="alert alert-danger">{{ form.headline.errors }}</div>
@@ -28,7 +61,15 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="{{ form.skills_input.id_for_label }}" class="form-label">Skills (comma-separated)</label>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <label for="{{ form.skills_input.id_for_label }}" class="form-label">Skills (comma-separated)</label>
+                                <div class="form-check form-switch">
+                                    {{ form.skills_public }}
+                                    <label class="form-check-label" for="{{ form.skills_public.id_for_label }}">
+                                        <small>Visible to recruiters</small>
+                                    </label>
+                                </div>
+                            </div>
                             {{ form.skills_input }}
                             {% if form.skills_input.errors %}
                                 <div class="alert alert-danger">{{ form.skills_input.errors }}</div>
@@ -36,7 +77,15 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="{{ form.education.id_for_label }}" class="form-label">Education</label>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <label for="{{ form.education.id_for_label }}" class="form-label">Education</label>
+                                <div class="form-check form-switch">
+                                    {{ form.education_public }}
+                                    <label class="form-check-label" for="{{ form.education_public.id_for_label }}">
+                                        <small>Visible to recruiters</small>
+                                    </label>
+                                </div>
+                            </div>
                             {{ form.education }}
                             {% if form.education.errors %}
                                 <div class="alert alert-danger">{{ form.education.errors }}</div>
@@ -44,15 +93,31 @@
                         </div>
                         
                         <div class="mb-3">
-                            <label for="{{ form.GPA.id_for_label }}" class="form-label">GPA</label>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <label for="{{ form.gpa.id_for_label }}" class="form-label">GPA</label>
+                                <div class="form-check form-switch">
+                                    {{ form.gpa_public }}
+                                    <label class="form-check-label" for="{{ form.gpa_public.id_for_label }}">
+                                        <small>Visible to recruiters</small>
+                                    </label>
+                                </div>
+                            </div>
                             {{ form.gpa }}
-                            {% if form.GPA.errors %}
-                                <div class="alert alert-danger">{{ form.GPA.errors }}</div>
+                            {% if form.gpa.errors %}
+                                <div class="alert alert-danger">{{ form.gpa.errors }}</div>
                             {% endif %}
                         </div>
 
                         <div class="mb-3">
-                            <label for="{{ form.work_experience.id_for_label }}" class="form-label">Work Experience</label>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <label for="{{ form.work_experience.id_for_label }}" class="form-label">Work Experience</label>
+                                <div class="form-check form-switch">
+                                    {{ form.work_experience_public }}
+                                    <label class="form-check-label" for="{{ form.work_experience_public.id_for_label }}">
+                                        <small>Visible to recruiters</small>
+                                    </label>
+                                </div>
+                            </div>
                             {{ form.work_experience }}
                             {% if form.work_experience.errors %}
                                 <div class="alert alert-danger">{{ form.work_experience.errors }}</div>
@@ -60,7 +125,15 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="{{ form.links.id_for_label }}" class="form-label">Links</label>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <label for="{{ form.links.id_for_label }}" class="form-label">Links</label>
+                                <div class="form-check form-switch">
+                                    {{ form.links_public }}
+                                    <label class="form-check-label" for="{{ form.links_public.id_for_label }}">
+                                        <small>Visible to recruiters</small>
+                                    </label>
+                                </div>
+                            </div>
                             {{ form.links }}
                             {% if form.links.errors %}
                                 <div class="alert alert-danger">{{ form.links.errors }}</div>

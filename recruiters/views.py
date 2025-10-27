@@ -6,6 +6,8 @@ from django.contrib import messages
 from django.core.mail import send_mail
 from django.conf import settings
 from django.http import HttpResponseBadRequest
+from django.http import JsonResponse
+from django.contrib.auth import get_user_model
 import smtplib
 import ssl
 from email.mime.multipart import MIMEMultipart
@@ -124,6 +126,9 @@ def candidates(request):
             candidates = candidates.filter(skills__name__contains=skill_term)
     else:
         candidates = Profile.objects.all().order_by('-created_at')
+    
+    # Filter out profiles that are hidden from recruiters
+    candidates = candidates.filter(profile_visible=True)
     #candidates = Profile.objects.all().order_by('-created_at')
 
     results = candidates.__len__
@@ -135,6 +140,8 @@ def candidates(request):
         search_results = search_results.filter(education__contains=search.education).filter(work_experience__contains=search.experience)
         if (search.skill):
             search_results = search_results.filter(skills__name__contains=search.skill)
+        # Also filter out hidden profiles from saved search results
+        search_results = search_results.filter(profile_visible=True)
         search.new_results = (search_results.count())
         search.save()
     
@@ -313,8 +320,8 @@ def recommendations(request):
     if not my_posts.exists():
         return render(request, 'recruiters/recommendations.html', {'recommendations': []})
     
-    # Get all candidates with profiles
-    candidates = Profile.objects.select_related('user').prefetch_related('skills').all()
+    # Get all candidates with profiles, only those with visible profiles
+    candidates = Profile.objects.select_related('user').prefetch_related('skills').filter(profile_visible=True)
     
     recommendations = []
     
