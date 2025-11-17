@@ -27,7 +27,6 @@
     }
     </style>
 
-    <!-- Job Details -->
     <h1>{{ post.title }}</h1>
     <h5 class="text-muted">{{ post.company }}</h5>
     <p>{{ post.description }}</p>
@@ -42,7 +41,6 @@
 
     <hr>
 
-    <!-- Applicant Pipeline / Kanban -->
     <h3>Applicant Pipeline</h3>
     <div class="row">
         {% for stage, entries in applicants_by_stage_list %}
@@ -69,10 +67,24 @@
         </div>
         {% endfor %}
     </div>
-</div>
+
+    <hr>
+
+    <h3>Applicant Locations</h3>
+    <div class="mb-4">
+        <div id="applicantMap" class="w-100 rounded border" style="height:60vh;"></div>
+    </div>
+    </div>
 {% endblock %}
 
 {% block extra_js %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+
 <script>
 console.log("✅ detail.html JS loaded");
 
@@ -94,6 +106,10 @@ function getCookie(name) {
 document.addEventListener('DOMContentLoaded', function() {
     console.log("✅ DOM fully loaded");
 
+    // ==========================================================
+    // 1. KANBAN / APPLICATION MOVE LOGIC
+    // ==========================================================
+    
     // Draggable applicant cards
     document.querySelectorAll('.card.mb-2.p-2').forEach(function(card) {
         card.setAttribute('draggable', 'true');
@@ -180,6 +196,75 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('Move error');
             location.reload();
         });
+    }
+
+    // ==========================================================
+    // 2. APPLICANT LOCATION MAP LOGIC (NEW/MODIFIED)
+    // ==========================================================
+    
+    const mapDataJson = '{{ applicant_map_data_json|safe }}'; 
+    let applicantData = [];
+    
+    try {
+        applicantData = JSON.parse(mapDataJson);
+    } catch (e) {
+        console.error("❌ Failed to parse map data (Check Python view context and |safe filter):", e);
+    }
+
+    const mapDiv = document.getElementById('applicantMap');
+    
+    if (applicantData.length === 0) {
+        console.log("⚠️ No applicant location data to display.");
+        if (mapDiv) {
+            mapDiv.innerHTML = '<div class="alert alert-info">No applicant locations with public coordinates found for this job.</div>';
+        }
+        return; 
+    }
+    
+    // Map Initialization
+    const jobLat = parseFloat('{{ post.lat|default:"39.8" }}');
+    const jobLng = parseFloat('{{ post.lng|default:"-98.6" }}');
+    const startZoom = (applicantData.length > 0) ? 5 : 4; 
+
+    // Initialize the map object
+    const map = L.map('applicantMap').setView([jobLat, jobLng], startZoom);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19, attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    // CRITICAL FIX: Force map to calculate its container size after initialization.
+    setTimeout(function() {
+        map.invalidateSize();
+        console.log("Map size invalidated.");
+    }, 100); 
+
+    const markers = L.markerClusterGroup();
+
+    applicantData.forEach(applicant => {
+        const lat = parseFloat(applicant.lat);
+        const lng = parseFloat(applicant.lng);
+        const name = `${applicant.user__first_name || ''} ${applicant.user__last_name || ''}`;
+
+        if (!isNaN(lat) && !isNaN(lng)) {
+            const marker = L.marker([lat, lng]);
+            marker.bindPopup(`<b>${name}</b><br>Applied for this job.`);
+            markers.addLayer(marker);
+        }
+    });
+
+    map.addLayer(markers);
+    
+    // Fit map bounds to show all markers
+    if (applicantData.length > 0) {
+        const bounds = L.latLngBounds();
+        applicantData.forEach(a => {
+            const lat = parseFloat(a.lat);
+            const lng = parseFloat(a.lng);
+            if (!isNaN(lat) && !isNaN(lng)) {
+                bounds.extend([lat, lng]);
+            }
+        });
+        map.fitBounds(bounds, {padding: [50, 50]});
     }
 });
 </script>

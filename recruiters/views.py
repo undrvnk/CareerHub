@@ -1,3 +1,4 @@
+import json
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
@@ -16,7 +17,7 @@ from email.mime.text import MIMEText
 from .models import Post, Applicant, SavedSearch
 from jobs.models import Application as JobApplication
 from profiles.models import Skill
-from profiles.models import Profile
+from profiles.models import Profile # <--- REQUIRED FOR MAP
 from accounts.models import User as UserAccount
 
 def index(request):
@@ -203,6 +204,20 @@ def delete(request, id):
 def detail(request, id):
     post = get_object_or_404(Post, id=id)
 
+    # --- START: Applicant Map Data Logic (NEW/MODIFIED) ---
+    applicant_users = JobApplication.objects.filter(job=post).values_list('applicant__id', flat=True).distinct()
+
+    candidate_locations = Profile.objects.filter(
+        user__id__in=applicant_users,
+        location_public=True,
+        lat__isnull=False,
+        lng__isnull=False
+    ).values('user__first_name', 'user__last_name', 'lat', 'lng')
+    
+    applicant_map_data = list(candidate_locations)
+    # --- END: Applicant Map Data Logic ---
+
+
     applicants = Applicant.objects.filter(post=post).order_by('-applied_at')
     job_applications = JobApplication.objects.filter(job=post).order_by('-created_at')
 
@@ -240,6 +255,7 @@ def detail(request, id):
         'post': post,
         'stages': stages,
         'applicants_by_stage_list': applicants_by_stage_list,
+        'applicant_map_data_json': json.dumps(applicant_map_data), # <--- Map data context
     })
 
 
