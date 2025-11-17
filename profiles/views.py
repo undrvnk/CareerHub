@@ -41,9 +41,16 @@ def edit_profile(request):
                     profile = form.save(commit=False)
                     if not profile.user_id:
                         profile.user = request.user
+                    
+                    # 3. Handle location coordinates
+                    lat = request.POST.get('lat')
+                    lng = request.POST.get('lng')
+                    profile.lat = float(lat) if lat else None
+                    profile.lng = float(lng) if lng else None
+                    
                     profile.save()
 
-                    # 3. Handle skills (Many-to-Many field)
+                    # 4. Handle skills (Many-to-Many field)
                     skills_input = form.cleaned_data.get('skills_input', '')
                     if skills_input:
                         profile.skills.clear()

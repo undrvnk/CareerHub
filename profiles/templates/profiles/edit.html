@@ -62,6 +62,34 @@
 
                         <div class="mb-3">
                             <div class="d-flex justify-content-between align-items-center mb-2">
+                                <label for="{{ form.location.id_for_label }}" class="form-label">Location (address)</label>
+                                <div class="form-check form-switch">
+                                    {{ form.location_public }}
+                                    <label class="form-check-label" for="{{ form.location_public.id_for_label }}">
+                                        <small>Visible to recruiters</small>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="input-group">
+                                {{ form.location }}
+                                <button id="geocodeBtn" class="btn btn-outline-secondary" type="button">Find on map</button>
+                            </div>
+                            <small class="text-muted">Type the address, click "Find on map", then drag the pin if needed.</small>
+                            {% if form.location.errors %}
+                                <div class="alert alert-danger">{{ form.location.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Hidden fields for precise coordinates (filled by the map) -->
+                        <input type="hidden" name="lat" id="id_lat" value="{% if profile %}{{ profile.lat }}{% endif %}">
+                        <input type="hidden" name="lng" id="id_lng" value="{% if profile %}{{ profile.lng }}{% endif %}">
+
+                        <div class="mb-3">
+                            <div id="map" class="w-100 rounded border" style="height:50vh;"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
                                 <label for="{{ form.skills_input.id_for_label }}" class="form-label">Skills (comma-separated)</label>
                                 <div class="form-check form-switch">
                                     {{ form.skills_public }}
@@ -150,4 +178,63 @@
         </div>
     </div>
 </div>
+
+<!-- Leaflet CSS/JS (CDN) -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+  // Get hidden inputs + address field
+  const latInput = document.getElementById("id_lat");
+  const lngInput = document.getElementById("id_lng");
+  const addrInput = document.getElementById("id_location");
+
+  // Start centered on the US
+  const startLat = {% if profile and profile.lat %}{{ profile.lat }}{% else %}39.8{% endif %};
+  const startLng = {% if profile and profile.lng %}{{ profile.lng }}{% else %}-98.6{% endif %};
+  const startZoom = {% if profile and profile.lat %}16{% else %}4{% endif %};
+
+  // Init map + base layer
+  const map = L.map('map').setView([startLat, startLng], startZoom);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; OpenStreetMap'
+  }).addTo(map);
+
+  // Draggable marker; keep hidden inputs in sync
+  let marker = L.marker([startLat, startLng], { draggable: true }).addTo(map);
+
+  function syncHidden(ll) {
+    latInput.value = ll.lat.toFixed(6);
+    lngInput.value = ll.lng.toFixed(6);
+  }
+  syncHidden(marker.getLatLng());
+
+  marker.on("dragend", () => syncHidden(marker.getLatLng()));
+
+  // Simple free geocoding via Nominatim (good for dev/prototype)
+  async function geocode(q) {
+    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}`;
+    const res = await fetch(url, { headers: { 'Accept-Language': 'en' } });
+    const data = await res.json();
+    return data && data.length ? { lat: parseFloat(data[0].lat), lon: parseFloat(data[0].lon) } : null;
+  }
+
+  document.getElementById("geocodeBtn").addEventListener("click", async () => {
+    const q = (addrInput.value || "").trim();
+    if (!q) { addrInput.focus(); return; }
+    try {
+      const hit = await geocode(q);
+      if (!hit) { alert("Address not found. Try a fuller address."); return; }
+      const ll = [hit.lat, hit.lon];
+      map.setView(ll, 16);
+      marker.setLatLng(ll);
+      syncHidden(marker.getLatLng());
+    } catch (e) {
+      console.warn(e);
+      alert("Geocoding failed. Please try again.");
+    }
+  });
+
+</script>
 {% endblock %}

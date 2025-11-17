@@ -5,7 +5,26 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .models import Application
 from recruiters.models import Post
+from profiles.models import Profile
 from .forms import ApplicationForm
+from math import radians, cos, sin, asin, sqrt
+
+def haversine_distance(lat1, lon1, lat2, lon2):
+    """
+    Calculate the great circle distance between two points 
+    on the earth (specified in decimal degrees)
+    Returns distance in miles
+    """
+    # convert decimal degrees to radians 
+    lat1, lon1, lat2, lon2 = map(radians, [lat1, lon1, lat2, lon2])
+    
+    # haversine formula 
+    dlat = lat2 - lat1 
+    dlon = lon2 - lon1 
+    a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
+    c = 2 * asin(sqrt(a)) 
+    r = 3959  # Radius of earth in miles
+    return c * r
 
 # List all jobs
 def index(request):
@@ -15,7 +34,9 @@ def index(request):
     salary_term = request.GET.get('search_salary')
     remote_term = request.GET.get('search_remote')
     visa_term = request.GET.get('search_visa')
-    if name_term or skill_term or location_term or salary_term or remote_term or visa_term:
+    max_distance = request.GET.get('max_distance')
+    
+    if name_term or skill_term or location_term or salary_term or remote_term or visa_term or max_distance:
         jobs = Post.objects.filter(title__contains=name_term)
         #TODO: make salary range a numeric comparison
         jobs = jobs.filter(location__contains=location_term).filter(salary_range__contains=salary_term).filter(location__contains=remote_term).filter(visa_sponsorship__contains=visa_term)
@@ -24,10 +45,50 @@ def index(request):
             jobs = jobs.filter(required_skills__name__contains=skill_term)
     else:
         jobs = Post.objects.all().order_by('-created_at')
-    #candidates = Profile.objects.all().order_by('-created_at')
-    return render(request, 'jobs/index.html', {'jobs': jobs})
-    #jobs = Post.objects.all().order_by('-created_at')
-    #return render(request, 'jobs/index.html', {'jobs': jobs})
+    
+    #####
+    #####
+    # Maybe change to map to filter too right now its just a field
+    # Filter by distance if user has location and max_distance is specified
+    if max_distance:
+        try:
+            max_distance = float(max_distance)
+            # Get current user's profile to check for location
+            if request.user.is_authenticated:
+                try:
+                    user_profile = Profile.objects.get(user=request.user)
+                    # Only filter if user has location coordinates
+                    if user_profile.lat and user_profile.lng:
+                        filtered_jobs = []
+                        for job in jobs:
+                            # Only include jobs with location data
+                            if job.lat and job.lng:
+                                distance = haversine_distance(
+                                    user_profile.lat, user_profile.lng,
+                                    job.lat, job.lng
+                                )
+                                if distance <= max_distance:
+                                    filtered_jobs.append(job)
+                        jobs = filtered_jobs
+                    else:
+                        messages.warning(request, "Your profile doesn't have a location set. Distance filtering requires your location.")
+                except Profile.DoesNotExist:
+                    messages.warning(request, "You need to create a profile with a location to use distance filtering.")
+            else:
+                messages.warning(request, "You must be logged in to use distance filtering.")
+        except ValueError:
+            messages.warning(request, "Invalid distance value.")
+    
+    return render(request, 'jobs/index.html', {
+        'jobs': jobs,
+        'max_distance': max_distance,
+        'name': name_term,
+        'skill': skill_term,
+        'location': location_term,
+        'salary': salary_term,
+        'remote': remote_term,
+        'visa': visa_term
+    })
 
 # Job detail view and application form
 @login_required

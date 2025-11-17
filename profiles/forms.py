@@ -24,12 +24,13 @@ class ProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
         fields = [
-            'headline', 'education', 'work_experience', 'gpa', 'links',
+            'headline', 'location', 'education', 'work_experience', 'gpa', 'links',
             'profile_visible', 'headline_public', 'skills_public', 'education_public', 
-            'gpa_public', 'work_experience_public', 'links_public', 'email_public'
+            'gpa_public', 'work_experience_public', 'links_public', 'email_public', 'location_public'
         ]
         widgets = {
             'headline': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Briefly describe yourself'}),
+            'location': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '123 Main St, City, ST'}),
             'education': forms.Textarea(attrs={
                 'class': 'form-control',
                 'rows': 3,
@@ -54,4 +55,5 @@ class ProfileForm(forms.ModelForm):
             'work_experience_public': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'links_public': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'email_public': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'location_public': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
