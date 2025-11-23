@@ -132,7 +132,7 @@
                             <input type="number" class="form-control" name="max_distance" step="0.1" min="0" 
                                 placeholder="No limit" value="{{ max_distance|default:'' }}">
                         </div>
-                        <button class="btn btn-primary w-100" type="submit">
+                        <button class="btn btn-success w-100" type="submit">
                             <i class="fas fa-search"></i> Search Jobs
                         </button>
                     </form>
@@ -164,7 +164,7 @@
                                     <small class="text-muted">(Not on map)</small>
                                 {% endif %}
                             </p>
-                            <a href="{% url 'jobs.detail' job.id %}" class="btn btn-primary">View Details</a>
+                            <a href="{% url 'jobs.detail' job.id %}" class="btn btn-success">View Details</a>
                         </div>
                     </div>
                 </div>
@@ -242,7 +242,7 @@
                             <strong>${job.title}</strong><br>
                             ${job.company}<br>
                             <small>${job.location}</small><br>
-                            <a href="/jobs/${job.id}/" class="btn btn-sm btn-primary mt-1 mb-1">View Details</a>
+                            <a href="/jobs/${job.id}/" class="btn btn-sm btn-success mt-1 mb-1">View Details</a>
                         </div>
                     `;
                 });
@@ -254,7 +254,7 @@
                     ${job.company}<br>
                     <small>${job.location}</small><br>
                     <small>${job.description}</small><br>
-                    <a href="/jobs/${job.id}/" class="btn btn-sm btn-primary mt-2">View Details</a>
+                    <a href="/jobs/${job.id}/" class="btn btn-sm btn-success mt-2">View Details</a>
                 `;
             }
             
