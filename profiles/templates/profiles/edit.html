@@ -1,36 +1,108 @@
 {% extends 'base.html' %}
 
+{% block extra_head %}
+<style>
+    /* Main outer card */
+    .profile-edit-card {
+        background: #DFECC6 !important;
+        border-radius: 18px;
+        border: 1px solid #cbdab0;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+        padding: 20px 22px;
+    }
+
+    /* Visibility settings card */
+    .visibility-card {
+        background: #f5f5f5;
+        border-radius: 16px;
+        border: 1px solid #d8d8d8;
+    }
+
+    .visibility-card .card-body {
+        padding: 16px 18px;
+    }
+
+    /* Themed primary button */
+    .btn-theme {
+        background: #687a4c !important;
+        color: #fff !important;
+        border-radius: 10px;
+        border: none;
+        padding: 10px 22px;
+        font-size: 0.95rem;
+    }
+
+    .btn-theme:hover {
+        background: #55633e !important;
+        color: #fff !important;
+    }
+
+    /* Themed outline button */
+    .btn-outline-theme {
+        border: 1px solid #687a4c !important;
+        color: #687a4c !important;
+        border-radius: 10px;
+        padding: 9px 20px;
+        font-size: 0.95rem;
+        background: transparent;
+    }
+
+    .btn-outline-theme:hover {
+        background: #687a4c !important;
+        color: #fff !important;
+    }
+
+    /* Map button – neutral but slightly rounded */
+    .btn-map {
+        border-radius: 8px;
+    }
+
+    .profile-edit-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 32px;
+        margin-bottom: 18px;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container mt-4">
     <div class="row">
         <div class="col-md-8 mx-auto">
-            <div class="card">
+            <div class="card profile-edit-card">
                 <div class="card-body">
-                    <h1 class="card-title mb-4">{% if profile %}Edit{% else %}Create{% endif %} Profile</h1>
+                    <h1 class="profile-edit-title">
+                        {% if profile %}Edit{% else %}Create{% endif %} Profile
+                    </h1>
                     
                     <form method="post">
                         {% csrf_token %}
                         
-                        <div class="card mb-4 border-primary">
-                            <div class="card-body bg-light">
-                                <h5 class="card-title">
+                        <!-- Visibility section -->
+                        <div class="card mb-4 visibility-card">
+                            <div class="card-body">
+                                <h5 class="card-title mb-2">
                                     <i class="fas fa-eye-slash"></i> Profile Visibility
                                 </h5>
-                                <div class="form-check form-switch">
+                                <div class="form-check form-switch mb-1">
                                     {{ form.profile_visible }}
                                     <label class="form-check-label fw-bold" for="{{ form.profile_visible.id_for_label }}">
                                         Make my profile visible to recruiters
                                     </label>
                                 </div>
                                 <small class="text-muted">
-                                    When unchecked, your entire profile will be hidden from all recruiters. You won't appear in searches, recommendations, or browse listings.
+                                    When unchecked, your entire profile will be hidden from all recruiters.
+                                    You won't appear in searches, recommendations, or browse listings.
                                 </small>
                             </div>
                         </div>
                         
+                        <!-- Email -->
                         <div class="mb-3">
                             <div class="d-flex justify-content-between align-items-center mb-2">
-                                <label for="{{ form.email.id_for_label }}" class="form-label">{{ form.email.label }}</label>
+                                <label for="{{ form.email.id_for_label }}" class="form-label">
+                                    {{ form.email.label }}
+                                </label>
                                 <div class="form-check form-switch">
                                     {{ form.email_public }}
                                     <label class="form-check-label" for="{{ form.email_public.id_for_label }}">
@@ -40,10 +112,11 @@
                             </div>
                             {{ form.email }}
                             {% if form.email.errors %}
-                                <div class="alert alert-danger">{{ form.email.errors }}</div>
+                                <div class="alert alert-danger mt-2">{{ form.email.errors }}</div>
                             {% endif %}
                         </div>
 
+                        <!-- Headline -->
                         <div class="mb-3">
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <label for="{{ form.headline.id_for_label }}" class="form-label">Headline</label>
@@ -56,13 +129,16 @@
                             </div>
                             {{ form.headline }}
                             {% if form.headline.errors %}
-                                <div class="alert alert-danger">{{ form.headline.errors }}</div>
+                                <div class="alert alert-danger mt-2">{{ form.headline.errors }}</div>
                             {% endif %}
                         </div>
 
+                        <!-- Location -->
                         <div class="mb-3">
                             <div class="d-flex justify-content-between align-items-center mb-2">
-                                <label for="{{ form.location.id_for_label }}" class="form-label">Location (address)</label>
+                                <label for="{{ form.location.id_for_label }}" class="form-label">
+                                    Location (address)
+                                </label>
                                 <div class="form-check form-switch">
                                     {{ form.location_public }}
                                     <label class="form-check-label" for="{{ form.location_public.id_for_label }}">
@@ -72,25 +148,33 @@
                             </div>
                             <div class="input-group">
                                 {{ form.location }}
-                                <button id="geocodeBtn" class="btn btn-outline-secondary" type="button">Find on map</button>
+                                <button id="geocodeBtn" class="btn btn-outline-secondary btn-map" type="button">
+                                    Find on map
+                                </button>
                             </div>
-                            <small class="text-muted">Type the address, click "Find on map", then drag the pin if needed.</small>
+                            <small class="text-muted">
+                                Type the address, click "Find on map", then drag the pin if needed.
+                            </small>
                             {% if form.location.errors %}
-                                <div class="alert alert-danger">{{ form.location.errors }}</div>
+                                <div class="alert alert-danger mt-2">{{ form.location.errors }}</div>
                             {% endif %}
                         </div>
 
-                        <!-- Hidden fields for precise coordinates (filled by the map) -->
+                        <!-- Hidden lat/lng -->
                         <input type="hidden" name="lat" id="id_lat" value="{% if profile %}{{ profile.lat }}{% endif %}">
                         <input type="hidden" name="lng" id="id_lng" value="{% if profile %}{{ profile.lng }}{% endif %}">
 
+                        <!-- Map -->
                         <div class="mb-3">
                             <div id="map" class="w-100 rounded border" style="height:50vh;"></div>
                         </div>
 
+                        <!-- Skills -->
                         <div class="mb-3">
                             <div class="d-flex justify-content-between align-items-center mb-2">
-                                <label for="{{ form.skills_input.id_for_label }}" class="form-label">Skills (comma-separated)</label>
+                                <label for="{{ form.skills_input.id_for_label }}" class="form-label">
+                                    Skills (comma-separated)
+                                </label>
                                 <div class="form-check form-switch">
                                     {{ form.skills_public }}
                                     <label class="form-check-label" for="{{ form.skills_public.id_for_label }}">
@@ -100,10 +184,11 @@
                             </div>
                             {{ form.skills_input }}
                             {% if form.skills_input.errors %}
-                                <div class="alert alert-danger">{{ form.skills_input.errors }}</div>
+                                <div class="alert alert-danger mt-2">{{ form.skills_input.errors }}</div>
                             {% endif %}
                         </div>
 
+                        <!-- Education -->
                         <div class="mb-3">
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <label for="{{ form.education.id_for_label }}" class="form-label">Education</label>
@@ -116,10 +201,11 @@
                             </div>
                             {{ form.education }}
                             {% if form.education.errors %}
-                                <div class="alert alert-danger">{{ form.education.errors }}</div>
+                                <div class="alert alert-danger mt-2">{{ form.education.errors }}</div>
                             {% endif %}
                         </div>
                         
+                        <!-- GPA -->
                         <div class="mb-3">
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <label for="{{ form.gpa.id_for_label }}" class="form-label">GPA</label>
@@ -132,13 +218,16 @@
                             </div>
                             {{ form.gpa }}
                             {% if form.gpa.errors %}
-                                <div class="alert alert-danger">{{ form.gpa.errors }}</div>
+                                <div class="alert alert-danger mt-2">{{ form.gpa.errors }}</div>
                             {% endif %}
                         </div>
 
+                        <!-- Work Experience -->
                         <div class="mb-3">
                             <div class="d-flex justify-content-between align-items-center mb-2">
-                                <label for="{{ form.work_experience.id_for_label }}" class="form-label">Work Experience</label>
+                                <label for="{{ form.work_experience.id_for_label }}" class="form-label">
+                                    Work Experience
+                                </label>
                                 <div class="form-check form-switch">
                                     {{ form.work_experience_public }}
                                     <label class="form-check-label" for="{{ form.work_experience_public.id_for_label }}">
@@ -148,11 +237,12 @@
                             </div>
                             {{ form.work_experience }}
                             {% if form.work_experience.errors %}
-                                <div class="alert alert-danger">{{ form.work_experience.errors }}</div>
+                                <div class="alert alert-danger mt-2">{{ form.work_experience.errors }}</div>
                             {% endif %}
                         </div>
 
-                        <div class="mb-3">
+                        <!-- Links -->
+                        <div class="mb-4">
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <label for="{{ form.links.id_for_label }}" class="form-label">Links</label>
                                 <div class="form-check form-switch">
@@ -164,14 +254,20 @@
                             </div>
                             {{ form.links }}
                             {% if form.links.errors %}
-                                <div class="alert alert-danger">{{ form.links.errors }}</div>
+                                <div class="alert alert-danger mt-2">{{ form.links.errors }}</div>
                             {% endif %}
                         </div>
 
+                        <!-- Actions -->
                         <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary">Save Profile</button>
-                            <a href="{% url 'profiles.view' %}" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn-theme">
+                                Save Profile
+                            </button>
+                            <a href="{% url 'profiles.view' %}" class="btn-outline-theme text-center">
+                                Cancel
+                            </a>
                         </div>
+
                     </form>
                 </div>
             </div>
@@ -189,7 +285,7 @@
   const lngInput = document.getElementById("id_lng");
   const addrInput = document.getElementById("id_location");
 
-  // Start centered on the US
+  // Start centered on the US or existing profile coords
   const startLat = {% if profile and profile.lat %}{{ profile.lat }}{% else %}39.8{% endif %};
   const startLng = {% if profile and profile.lng %}{{ profile.lng }}{% else %}-98.6{% endif %};
   const startZoom = {% if profile and profile.lat %}16{% else %}4{% endif %};
@@ -212,7 +308,7 @@
 
   marker.on("dragend", () => syncHidden(marker.getLatLng()));
 
-  // Simple free geocoding via Nominatim (good for dev/prototype)
+  // Simple free geocoding via Nominatim
   async function geocode(q) {
     const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}`;
     const res = await fetch(url, { headers: { 'Accept-Language': 'en' } });
@@ -235,6 +331,5 @@
       alert("Geocoding failed. Please try again.");
     }
   });
-
 </script>
 {% endblock %}

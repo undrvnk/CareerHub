@@ -1,60 +1,204 @@
 {% extends 'base.html' %}
 
+{% block extra_head %}
+<style>
+    .jobs-hero-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 52px;
+        text-align: center;
+        margin-top: 60px;
+        margin-bottom: 10px;
+    }
+
+    .jobs-hero-subtitle {
+        text-align: center;
+        font-size: 18px;
+        color: #555;
+        margin-bottom: 30px;
+    }
+
+    .jobs-filter-card {
+        background: #f5f5f5;
+        border-radius: 20px;
+        padding: 25px 25px 15px 25px;
+        margin-bottom: 30px;
+    }
+
+    .jobs-filter-card .input-group {
+        margin-bottom: 12px;
+    }
+
+    .jobs-filter-label {
+        min-width: 110px;
+        justify-content: center;
+    }
+
+    .jobs-search-btn {
+        margin-top: 10px;
+        width: 100%;
+    }
+
+    @media (min-width: 992px) {
+        .jobs-search-btn {
+            width: auto;
+        }
+    }
+
+    /* UPDATED: Job tiles match the green theme */
+    .job-card {
+        background: #DFECC6 !important;
+        border-radius: 18px;
+        border: 1px solid #cbdab0;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+        height: 100%;
+        transition: transform 0.1s ease, box-shadow 0.1s ease;
+        padding-bottom: 12px;
+    }
+
+    .job-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 18px rgba(0,0,0,0.06);
+    }
+
+    .job-card-title {
+        font-size: 20px;
+        font-weight: 600;
+        margin-bottom: 4px;
+    }
+
+    .job-card-company {
+        font-size: 14px;
+        color: #777;
+        margin-bottom: 10px;
+    }
+
+    .job-card-meta {
+        font-size: 14px;
+        color: #555;
+        margin-bottom: 6px;
+    }
+
+    .jobs-empty-state {
+        text-align: center;
+        color: #777;
+        margin-top: 40px;
+        font-size: 18px;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container mt-5">
-    <h1>Available Jobs</h1>
-    <div class="row mt-4">
+<div class="container mt-4 mb-5">
+
+    <!-- Heading -->
+    <h1 class="jobs-hero-title">Available Jobs</h1>
+    <p class="jobs-hero-subtitle">
+        Search and explore opportunities tailored to your skills and goals.
+    </p>
+
+    <!-- Filter Card -->
+    <div class="jobs-filter-card">
         <form method="GET">
-            <div class="row">
-                <div class="col-auto">
-                    <div class="input-group col-auto">
-                        <div class="input-group-text">Title</div>
-                        <input type="text" class="form-control" name="search_name">
-                    </div>
-                    <div class="input-group col-auto">
-                        <div class="input-group-text">Skill</div>
-                        <input type="text" class="form-control" name="search_skill">
-                    </div>
-                    <div class="input-group col-auto">
-                        <div class="input-group-text">Location</div>
-                        <input type="text" class="form-control" name="search_location">
-                    </div>
-                    <div class="input-group col-auto">
-                        <div class="input-group-text">Salary</div>
-                        <!-- TODO: split search_salary into lower and upper bound numeric ranges-->
-                        <input type="text" class="form-control" name="search_salary">
-                    </div>
-                    <div class="input-group col-auto">
-                        <div class="input-group-text">Remote</div>
-                        <input type="text" class="form-control" name="search_remote">
-                    </div>
-                    <div class="input-group col-auto">
-                        <div class="input-group-text">Visa</div>
-                        <input type="text" class="form-control" name="search_visa">
-                    </div>
-                    <div class="input-group col-auto">
-                        <div class="input-group-text">Max Distance (miles)</div>
-                        <input type="number" class="form-control" name="max_distance" step="0.1" min="0" placeholder="No limit">
+            <div class="row g-3">
+                <div class="col-lg-9">
+                    <div class="row">
+
+                        <div class="col-md-6">
+                            <div class="input-group">
+                                <span class="input-group-text jobs-filter-label">Title</span>
+                                <input type="text" class="form-control" name="search_name"
+                                       placeholder="e.g. Software Engineer">
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="input-group">
+                                <span class="input-group-text jobs-filter-label">Skill</span>
+                                <input type="text" class="form-control" name="search_skill"
+                                       placeholder="e.g. Python, React">
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="input-group">
+                                <span class="input-group-text jobs-filter-label">Location</span>
+                                <input type="text" class="form-control" name="search_location"
+                                       placeholder="City, State, or Country">
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="input-group">
+                                <span class="input-group-text jobs-filter-label">Salary</span>
+                                <input type="text" class="form-control" name="search_salary"
+                                       placeholder="e.g. 100000+">
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="input-group">
+                                <span class="input-group-text jobs-filter-label">Remote</span>
+                                <input type="text" class="form-control" name="search_remote"
+                                       placeholder="Yes / Hybrid / No">
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="input-group">
+                                <span class="input-group-text jobs-filter-label">Visa</span>
+                                <input type="text" class="form-control" name="search_visa"
+                                       placeholder="e.g. H1B, Sponsorship">
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="input-group">
+                                <span class="input-group-text jobs-filter-label">Max Distance (mi)</span>
+                                <input type="number" class="form-control" name="max_distance"
+                                       step="0.1" min="0" placeholder="No limit">
+                            </div>
+                        </div>
+
                     </div>
                 </div>
-                <div class="col-auto">
-                    <button class="btn bg-dark text-white" type="submit">Keyword Search</button>
+
+                <div class="col-lg-3 d-flex align-items-end justify-content-lg-end">
+                    <button class="btn btn-dark jobs-search-btn" type="submit">
+                        Keyword Search
+                    </button>
                 </div>
             </div>
         </form>
-        {% for job in jobs %}
-        <div class="col-md-6 mb-4">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">{{ job.title }}</h5>
-                    <h6 class="card-subtitle mb-2 text-muted">{{ job.company }}</h6>
-                    <p class="card-text">{{ job.description|truncatewords:30 }}</p>
-                    <p class="card-text">Location: {{ job.location }}</p>
-                    <a href="{% url 'jobs.detail' job.id %}" class="btn btn-primary">View Details</a>
+    </div>
+
+    <!-- Job Cards -->
+    <div class="row mt-3">
+        {% if jobs %}
+            {% for job in jobs %}
+            <div class="col-md-6 mb-4">
+                <div class="card job-card">
+                    <div class="card-body">
+                        <div class="job-card-title">{{ job.title }}</div>
+                        <div class="job-card-company">{{ job.company }}</div>
+
+                        <p class="card-text">
+                            {{ job.description|truncatewords:30 }}
+                        </p>
+
+                        <p class="job-card-meta">Location: {{ job.location }}</p>
+
+                        <a href="{% url 'jobs.detail' job.id %}" class="btn-view-details mt-1">
+                            View Details
+                        </a>
+                    </div>
                 </div>
             </div>
-        </div>
-        {% endfor %}
+            {% endfor %}
+        {% else %}
+            <div class="jobs-empty-state">
+                No jobs match your current filters. Try adjusting your search.
+            </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
