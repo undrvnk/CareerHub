@@ -38,7 +38,10 @@ def email_candidate(request):
     subject = request.POST.get('subject')
     message_body = request.POST.get('message_body')
     recruiter_email = request.POST.get('recruiter_email')
-    email_password = request.POST.get('email_password')
+    
+    # TODO: Paste your CareerHub app password here
+    careerhub_password = 'gthc tyyu chmx agnt'  # App password for cs2340careerhub@gmail.com
+    
     # Get redirect URL from hidden field
     redirect_url = request.POST.get('redirect_url', request.META.get('HTTP_REFERER', '/'))
 
@@ -55,18 +58,20 @@ def email_candidate(request):
     try:
         # Construct the email body, including recruiter's details
         recruiter_name = f"{request.user.first_name} {request.user.last_name}"
-        full_message = f"Dear Candidate,\n\n{message_body}\n\n---\nBest regards,\n{recruiter_name}\nContact: {recruiter_email}"
+        full_message = f"\n\n{message_body}\n\n---\n"
         msg = MIMEMultipart()
-        msg['From'] = recruiter_email
+        msg['From'] = 'cs2340careerhub@gmail.com'
         msg['To'] = candidate_email
+        msg['Cc'] = recruiter_email  # CC the recruiter
         msg['Subject'] = subject
         msg.attach(MIMEText(full_message, 'plain'))
         with smtplib.SMTP('smtp.gmail.com', 587) as server:
             server.starttls(context=ssl.create_default_context())
-            server.login(recruiter_email, email_password)
-            server.send_message(msg)
+            server.login('cs2340careerhub@gmail.com', careerhub_password)
+            # Send to both candidate and recruiter (via CC)
+            server.sendmail('cs2340careerhub@gmail.com', [candidate_email, recruiter_email], msg.as_string())
         print("Success")
-        messages.success(request, f"Email sent successfully to {candidate_email}!")
+        messages.success(request, f"Email sent successfully to {candidate_email} (with CC to {recruiter_email})!")
     except Exception as e:
         print(e)
         messages.error(request, f"Failed to send email: {e}")
