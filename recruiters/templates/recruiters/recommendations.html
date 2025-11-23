@@ -223,6 +223,8 @@
                             placeholder="Your email address (you will be CC'd on this email)"
                             value="{{ request.user.email|default:'' }}"> 
                     </div>
+
+                    <div class="mb-3">
                         <label for="emailSubject" class="form-label">Subject</label>
                         <input type="text" class="form-control" id="emailSubject" name="subject" required>
                     </div>
