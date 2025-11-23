@@ -36,6 +36,7 @@
                     <p class="card-text">
                         <strong>Applied on:</strong> {{ application.created_at }}
                     </p>
+                    <a href="{% url 'jobs.detail' application.job.id %}" class="btn btn-success mt-3">View Job</a>
                 </div>
             </div>
         </div>

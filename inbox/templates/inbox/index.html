@@ -1,25 +1,60 @@
 {% extends 'base.html' %}
+
+{% block extra_head %}
+<style>
+    .inbox-message-card {
+        background: #DFECC6 !important;
+        border-radius: 18px;
+        border: 1px solid #cbdab0;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+        transition: transform 0.1s ease, box-shadow 0.1s ease;
+    }
+
+    .inbox-message-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 18px rgba(0,0,0,0.06);
+    }
+
+    .inbox-subject {
+        font-size: 20px;
+        font-weight: 600;
+        margin-bottom: 12px;
+        color: #333;
+    }
+
+    .inbox-sender {
+        font-size: 14px;
+        color: #666;
+        margin-top: 15px;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="p-3 mt-4">
-  <div class="container">
+<div class="container mt-5">
     <h1>Inbox</h1>
-    <div class="row justify-content-center">
-      <div class="col-md-8">
-        {% for message in inbox %}
-        <div class="card shadow p-3 mb-4 rounded">
-          <div class="card-body">
-            <h2>{{ message.subject }}</h2>
-            <hr />
-            <p>{{ message.body }}</p>
-            <b class="text-muted">From: {{ message.sender.last_name }}, {{ message.sender.first_name }}</b>
-            <br><a href="{% url 'inbox.compose' message.sender.id%}" class="btn btn-sm btn-outline-primary mt-2">
-                Reply
-            </a>
-          </div>
+    <div class="row justify-content-center mt-4">
+        <div class="col-lg-8 col-md-10">
+            {% for message in inbox %}
+            <div class="card inbox-message-card p-4 mb-4">
+                <div class="card-body p-0">
+                    <h5 class="inbox-subject">{{ message.subject }}</h5>
+                    <hr />
+                    <p>{{ message.body }}</p>
+                    <div class="inbox-sender">
+                        <b>From: {{ message.sender.last_name }}, {{ message.sender.first_name }}</b>
+                    </div>
+                    <a href="{% url 'inbox.compose' message.sender.id %}" class="btn btn-success mt-3">
+                        Reply
+                    </a>
+                </div>
+            </div>
+            {% empty %}
+            <div class="alert alert-info text-center">
+                <p>No messages in your inbox.</p>
+            </div>
+            {% endfor %}
         </div>
-        {% endfor %}
-      </div>
     </div>
-  </div>
 </div>
-{% endblock content %}
+{% endblock %}

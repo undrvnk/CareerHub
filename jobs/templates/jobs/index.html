@@ -114,6 +114,7 @@
                         <div class="mb-3">
                             <label class="form-label">Location</label>
                             <input type="text" class="form-control" name="search_location" value="{{ location|default:'' }}">
+                            <small class="text-muted">Search by location text (e.g., "New York")</small>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Salary</label>
@@ -131,7 +132,11 @@
                             <label class="form-label">Max Distance (miles)</label>
                             <input type="number" class="form-control" name="max_distance" step="0.1" min="0" 
                                 placeholder="No limit" value="{{ max_distance|default:'' }}">
+                            <small class="text-muted">Filters jobs based on distance from selected location or your profile location if none selected</small>
                         </div>
+                        <!-- Hidden inputs for map-selected location -->
+                        <input type="hidden" name="filter_lat" id="filter_lat" value="{{ filter_lat|default:'' }}">
+                        <input type="hidden" name="filter_lng" id="filter_lng" value="{{ filter_lng|default:'' }}">
                         <button class="btn btn-success w-100" type="submit">
                             <i class="fas fa-search"></i> Search Jobs
                         </button>
@@ -186,8 +191,13 @@
     crossorigin=""></script>
 
 <script>
+    // Determine map center: use user's profile location if available, otherwise use US center
+    var centerLat = {% if user_lat %}{{ user_lat }}{% else %}39.8283{% endif %};
+    var centerLng = {% if user_lng %}{{ user_lng }}{% else %}-98.5795{% endif %};
+    var zoomLevel = {% if user_lat %}12{% else %}4{% endif %};
+    
     // Initialize the map
-    var map = L.map('map').setView([39.8283, -98.5795], 4); // Center of US
+    var map = L.map('map').setView([centerLat, centerLng], zoomLevel);
     
     // Add OpenStreetMap tiles
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {

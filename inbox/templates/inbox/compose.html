@@ -1,25 +1,61 @@
 {% extends 'base.html' %}
 
+{% block extra_head %}
+<style>
+    .compose-card {
+        background: #DFECC6 !important;
+        border-radius: 18px;
+        border: 1px solid #cbdab0;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+    }
+
+    .compose-card .form-label {
+        font-weight: 500;
+        color: #333;
+        margin-top: 12px;
+        margin-bottom: 8px;
+    }
+
+    .compose-card .form-control {
+        border-radius: 10px;
+        border: 1px solid #cbdab0;
+    }
+
+    .compose-card .form-control:focus {
+        border-color: #687a4c;
+        box-shadow: 0 0 0 0.2rem rgba(104, 122, 76, 0.25);
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container mt-5">
-  <h1>Compose New Message to {{ receiver.first_name }} {{ receiver.last_name }}</h1>
-  <div class="row mt-4">
-    <div class="col-md-8">
-      <form method="post">
-        {% csrf_token %}
+    <h1>Compose New Message</h1>
+    <div class="row justify-content-center mt-4">
+        <div class="col-lg-8 col-md-10">
+            <div class="card compose-card p-4">
+                <div class="card-body p-0">
+                    <h5 class="mb-4">To: {{ receiver.first_name }} {{ receiver.last_name }}</h5>
+                    <form method="post">
+                        {% csrf_token %}
 
-        <p>
-          <label for="subject">Subject:</label>
-          <input type="text" name="subject" required class="form-control" id="subject" value="">
-        </p>
-        <p>
-          <label for="body">Body:</label>
-          <textarea name="body" required class="form-control" id="body" rows="6"></textarea>
-        </p>
+                        <div class="mb-3">
+                            <label for="subject" class="form-label">Subject:</label>
+                            <input type="text" name="subject" required class="form-control" id="subject" value="">
+                        </div>
 
-        <button type="submit" class="btn btn-success">Send</button>
-      </form>
+                        <div class="mb-4">
+                            <label for="body" class="form-label">Message:</label>
+                            <textarea name="body" required class="form-control" id="body" rows="6"></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-success w-100">
+                            <i class="fas fa-paper-plane"></i> Send Message
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
 {% endblock %}

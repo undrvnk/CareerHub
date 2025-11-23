@@ -36,47 +36,68 @@ def index(request):
     remote_term = request.GET.get('search_remote')
     visa_term = request.GET.get('search_visa')
     max_distance = request.GET.get('max_distance')
+    filter_lat = request.GET.get('filter_lat')
+    filter_lng = request.GET.get('filter_lng')
     
     if name_term or skill_term or location_term or salary_term or remote_term or visa_term or max_distance:
         jobs = Post.objects.filter(title__contains=name_term)
         #TODO: make salary range a numeric comparison
-        jobs = jobs.filter(location__contains=location_term).filter(salary_range__contains=salary_term).filter(location__contains=remote_term).filter(visa_sponsorship__contains=visa_term)
+        jobs = jobs.filter(salary_range__contains=salary_term).filter(location__contains=remote_term).filter(visa_sponsorship__contains=visa_term)
         #candidates = candidates.filter(education__contains=education_term).filter(work_experience__contains=experience_term)
         if (skill_term):
             jobs = jobs.filter(required_skills__name__contains=skill_term)
     else:
         jobs = Post.objects.all().order_by('-created_at')
     
-    #####
-    #####
-    # Maybe change to map to filter too right now its just a field
-    # Filter by distance if user has location and max_distance is specified
+    # Get user's profile location as default for filtering
+    user_lat = None
+    user_lng = None
+    user_location_available = False
+    
+    if request.user.is_authenticated:
+        try:
+            user_profile = Profile.objects.get(user=request.user)
+            if user_profile.lat and user_profile.lng:
+                user_lat = user_profile.lat
+                user_lng = user_profile.lng
+                user_location_available = True
+        except Profile.DoesNotExist:
+            pass
+    
+    # Determine filter center: use map-selected location if provided, otherwise use profile location
+    filter_center_lat = user_lat
+    filter_center_lng = user_lng
+    
+    if filter_lat and filter_lng:
+        try:
+            filter_center_lat = float(filter_lat)
+            filter_center_lng = float(filter_lng)
+        except ValueError:
+            pass
+    
+    # Filter by distance if max_distance is specified
     if max_distance:
         try:
             max_distance = float(max_distance)
-            # Get current user's profile to check for location
-            if request.user.is_authenticated:
-                try:
-                    user_profile = Profile.objects.get(user=request.user)
-                    # Only filter if user has location coordinates
-                    if user_profile.lat and user_profile.lng:
-                        filtered_jobs = []
-                        for job in jobs:
-                            # Only include jobs with location data
-                            if job.lat and job.lng:
-                                distance = haversine_distance(
-                                    user_profile.lat, user_profile.lng,
-                                    job.lat, job.lng
-                                )
-                                if distance <= max_distance:
-                                    filtered_jobs.append(job)
-                        jobs = filtered_jobs
-                    else:
-                        messages.warning(request, "Your profile doesn't have a location set. Distance filtering requires your location.")
-                except Profile.DoesNotExist:
-                    messages.warning(request, "You need to create a profile with a location to use distance filtering.")
+            
+            # If we have a filter center, use it; otherwise use profile location
+            if filter_center_lat and filter_center_lng:
+                filtered_jobs = []
+                for job in jobs:
+                    # Only include jobs with location data
+                    if job.lat and job.lng:
+                        distance = haversine_distance(
+                            filter_center_lat, filter_center_lng,
+                            job.lat, job.lng
+                        )
+                        if distance <= max_distance:
+                            filtered_jobs.append(job)
+                jobs = filtered_jobs
             else:
-                messages.warning(request, "You must be logged in to use distance filtering.")
+                if request.user.is_authenticated:
+                    messages.warning(request, "Your profile doesn't have a location set. Please set your location to use distance filtering.")
+                else:
+                    messages.warning(request, "Please log in and set your location to use distance filtering.")
         except ValueError:
             messages.warning(request, "Invalid distance value.")
     
@@ -105,7 +126,12 @@ def index(request):
         'location': location_term,
         'salary': salary_term,
         'remote': remote_term,
-        'visa': visa_term
+        'visa': visa_term,
+        'filter_lat': filter_lat,
+        'filter_lng': filter_lng,
+        'user_lat': user_lat,
+        'user_lng': user_lng,
+        'user_location_available': user_location_available,
     })
 
 # Job detail view and application form
