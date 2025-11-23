@@ -8,6 +8,7 @@ from recruiters.models import Post
 from profiles.models import Profile
 from .forms import ApplicationForm
 from math import radians, cos, sin, asin, sqrt
+import json
 
 def haversine_distance(lat1, lon1, lat2, lon2):
     """
@@ -79,8 +80,25 @@ def index(request):
         except ValueError:
             messages.warning(request, "Invalid distance value.")
     
+    # Prepare job data for map markers
+    jobs_with_location = []
+    for job in jobs:
+        if job.lat and job.lng:
+            jobs_with_location.append({
+                'id': job.id,
+                'title': job.title,
+                'company': job.company,
+                'location': job.location,
+                'lat': job.lat,
+                'lng': job.lng,
+                'description': job.description[:100] + '...' if len(job.description) > 100 else job.description
+            })
+    
+    jobs_json = json.dumps(jobs_with_location)
+    
     return render(request, 'jobs/index.html', {
         'jobs': jobs,
+        'jobs_json': jobs_json,
         'max_distance': max_distance,
         'name': name_term,
         'skill': skill_term,

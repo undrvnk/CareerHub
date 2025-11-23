@@ -88,117 +88,261 @@
 {% endblock %}
 
 {% block content %}
-<div class="container mt-4 mb-5">
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" 
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" 
+    crossorigin=""/>
 
-    <!-- Heading -->
-    <h1 class="jobs-hero-title">Available Jobs</h1>
-    <p class="jobs-hero-subtitle">
-        Search and explore opportunities tailored to your skills and goals.
-    </p>
-
-    <!-- Filter Card -->
-    <div class="jobs-filter-card">
-        <form method="GET">
-            <div class="row g-3">
-                <div class="col-lg-9">
-                    <div class="row">
-
-                        <div class="col-md-6">
-                            <div class="input-group">
-                                <span class="input-group-text jobs-filter-label">Title</span>
-                                <input type="text" class="form-control" name="search_name"
-                                       placeholder="e.g. Software Engineer">
-                            </div>
+<div class="container-fluid mt-5">
+    <h1>Available Jobs</h1>
+    
+    <div class="row mt-4">
+        <!-- Search Filters Column -->
+        <div class="col-lg-4 col-md-5">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Search Filters</h5>
+                    <form method="GET">
+                        <div class="mb-3">
+                            <label class="form-label">Title</label>
+                            <input type="text" class="form-control" name="search_name" value="{{ name|default:'' }}">
                         </div>
-
-                        <div class="col-md-6">
-                            <div class="input-group">
-                                <span class="input-group-text jobs-filter-label">Skill</span>
-                                <input type="text" class="form-control" name="search_skill"
-                                       placeholder="e.g. Python, React">
-                            </div>
+                        <div class="mb-3">
+                            <label class="form-label">Skill</label>
+                            <input type="text" class="form-control" name="search_skill" value="{{ skill|default:'' }}">
                         </div>
-
-                        <div class="col-md-6">
-                            <div class="input-group">
-                                <span class="input-group-text jobs-filter-label">Location</span>
-                                <input type="text" class="form-control" name="search_location"
-                                       placeholder="City, State, or Country">
-                            </div>
+                        <div class="mb-3">
+                            <label class="form-label">Location</label>
+                            <input type="text" class="form-control" name="search_location" value="{{ location|default:'' }}">
                         </div>
-
-                        <div class="col-md-6">
-                            <div class="input-group">
-                                <span class="input-group-text jobs-filter-label">Salary</span>
-                                <input type="text" class="form-control" name="search_salary"
-                                       placeholder="e.g. 100000+">
-                            </div>
+                        <div class="mb-3">
+                            <label class="form-label">Salary</label>
+                            <input type="text" class="form-control" name="search_salary" value="{{ salary|default:'' }}">
                         </div>
-
-                        <div class="col-md-6">
-                            <div class="input-group">
-                                <span class="input-group-text jobs-filter-label">Remote</span>
-                                <input type="text" class="form-control" name="search_remote"
-                                       placeholder="Yes / Hybrid / No">
-                            </div>
+                        <div class="mb-3">
+                            <label class="form-label">Remote</label>
+                            <input type="text" class="form-control" name="search_remote" value="{{ remote|default:'' }}">
                         </div>
-
-                        <div class="col-md-6">
-                            <div class="input-group">
-                                <span class="input-group-text jobs-filter-label">Visa</span>
-                                <input type="text" class="form-control" name="search_visa"
-                                       placeholder="e.g. H1B, Sponsorship">
-                            </div>
+                        <div class="mb-3">
+                            <label class="form-label">Visa Sponsorship</label>
+                            <input type="text" class="form-control" name="search_visa" value="{{ visa|default:'' }}">
                         </div>
-
-                        <div class="col-md-6">
-                            <div class="input-group">
-                                <span class="input-group-text jobs-filter-label">Max Distance (mi)</span>
-                                <input type="number" class="form-control" name="max_distance"
-                                       step="0.1" min="0" placeholder="No limit">
-                            </div>
+                        <div class="mb-3">
+                            <label class="form-label">Max Distance (miles)</label>
+                            <input type="number" class="form-control" name="max_distance" step="0.1" min="0" 
+                                placeholder="No limit" value="{{ max_distance|default:'' }}">
                         </div>
-
+                        <button class="btn btn-primary w-100" type="submit">
+                            <i class="fas fa-search"></i> Search Jobs
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Map -->
+            <div class="card">
+                <div class="card-body p-0">
+                    <div id="map" style="height: 400px; width: 100%;"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Job Listings Column -->
+        <div class="col-lg-8 col-md-7">
+            <h5 class="mb-3">{{ jobs|length }} Job{{ jobs|length|pluralize }} Found</h5>
+            <div class="row">
+                {% for job in jobs %}
+                <div class="col-lg-6 col-md-12 mb-4">
+                    <div class="card h-100 job-card" data-job-id="{{ job.id }}">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ job.title }}</h5>
+                            <h6 class="card-subtitle mb-2 text-muted">{{ job.company }}</h6>
+                            <p class="card-text">{{ job.description|truncatewords:30 }}</p>
+                            <p class="card-text">
+                                <i class="fas fa-map-marker-alt"></i> {{ job.location }}
+                                {% if not job.has_location_pin %}
+                                    <small class="text-muted">(Not on map)</small>
+                                {% endif %}
+                            </p>
+                            <a href="{% url 'jobs.detail' job.id %}" class="btn btn-primary">View Details</a>
+                        </div>
                     </div>
                 </div>
-
-                <div class="col-lg-3 d-flex align-items-end justify-content-lg-end">
-                    <button class="btn btn-dark jobs-search-btn" type="submit">
-                        Keyword Search
-                    </button>
-                </div>
-            </div>
-        </form>
-    </div>
-
-    <!-- Job Cards -->
-    <div class="row mt-3">
-        {% if jobs %}
-            {% for job in jobs %}
-            <div class="col-md-6 mb-4">
-                <div class="card job-card">
-                    <div class="card-body">
-                        <div class="job-card-title">{{ job.title }}</div>
-                        <div class="job-card-company">{{ job.company }}</div>
-
-                        <p class="card-text">
-                            {{ job.description|truncatewords:30 }}
-                        </p>
-
-                        <p class="job-card-meta">Location: {{ job.location }}</p>
-
-                        <a href="{% url 'jobs.detail' job.id %}" class="btn-view-details mt-1">
-                            View Details
-                        </a>
+                {% empty %}
+                <div class="col-12">
+                    <div class="alert alert-info">
+                        No jobs found matching your criteria. Try adjusting your search filters.
                     </div>
                 </div>
+                {% endfor %}
             </div>
-            {% endfor %}
-        {% else %}
-            <div class="jobs-empty-state">
-                No jobs match your current filters. Try adjusting your search.
-            </div>
-        {% endif %}
+        </div>
     </div>
 </div>
+
+<!-- Leaflet JavaScript -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" 
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" 
+    crossorigin=""></script>
+
+<script>
+    // Initialize the map
+    var map = L.map('map').setView([39.8283, -98.5795], 4); // Center of US
+    
+    // Add OpenStreetMap tiles
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+    
+    // Custom icon for job markers
+    var jobIcon = L.icon({
+        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+    });
+    
+    // Parse jobs data from Django
+    var jobs = {{ jobs_json|safe }};
+    
+    if (jobs.length > 0) {
+        var markers = [];
+        
+        // Group jobs by location (rounded to 4 decimal places to handle slight variations)
+        var locationGroups = {};
+        jobs.forEach(function(job) {
+            var key = job.lat.toFixed(4) + ',' + job.lng.toFixed(4);
+            if (!locationGroups[key]) {
+                locationGroups[key] = {
+                    lat: job.lat,
+                    lng: job.lng,
+                    jobs: []
+                };
+            }
+            locationGroups[key].jobs.push(job);
+        });
+        
+        // Create markers for each location group
+        Object.values(locationGroups).forEach(function(group) {
+            var isMultiple = group.jobs.length > 1;
+            
+            // Build popup content
+            var popupContent = '';
+            if (isMultiple) {
+                popupContent = `<div style="max-height: 300px; overflow-y: auto;">
+                    <strong>${group.jobs.length} Jobs at this location</strong><br><br>`;
+                
+                group.jobs.forEach(function(job, index) {
+                    if (index > 0) popupContent += '<hr style="margin: 10px 0;">';
+                    popupContent += `
+                        <div class="popup-job-item">
+                            <strong>${job.title}</strong><br>
+                            ${job.company}<br>
+                            <small>${job.location}</small><br>
+                            <a href="/jobs/${job.id}/" class="btn btn-sm btn-primary mt-1 mb-1">View Details</a>
+                        </div>
+                    `;
+                });
+                popupContent += '</div>';
+            } else {
+                var job = group.jobs[0];
+                popupContent = `
+                    <strong>${job.title}</strong><br>
+                    ${job.company}<br>
+                    <small>${job.location}</small><br>
+                    <small>${job.description}</small><br>
+                    <a href="/jobs/${job.id}/" class="btn btn-sm btn-primary mt-2">View Details</a>
+                `;
+            }
+            
+            var marker = L.marker([group.lat, group.lng], {icon: jobIcon})
+                .addTo(map)
+                .bindPopup(popupContent, {maxWidth: 300});
+            
+            markers.push(marker);
+            
+            // Add click event to highlight corresponding job cards
+            marker.on('popupopen', function() {
+                // Remove highlight from all cards
+                document.querySelectorAll('.job-card').forEach(function(card) {
+                    card.style.border = '';
+                    card.style.boxShadow = '';
+                });
+                
+                // Highlight all job cards at this location
+                group.jobs.forEach(function(job) {
+                    var jobCard = document.querySelector(`.job-card[data-job-id="${job.id}"]`);
+                    if (jobCard) {
+                        jobCard.style.border = '2px solid #0d6efd';
+                        jobCard.style.boxShadow = '0 0 10px rgba(13, 110, 253, 0.5)';
+                    }
+                });
+                
+                // Scroll to first job card
+                if (group.jobs.length > 0) {
+                    var firstJobCard = document.querySelector(`.job-card[data-job-id="${group.jobs[0].id}"]`);
+                    if (firstJobCard) {
+                        firstJobCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }
+            });
+            
+            // Remove highlights when popup closes
+            marker.on('popupclose', function() {
+                document.querySelectorAll('.job-card').forEach(function(card) {
+                    card.style.border = '';
+                    card.style.boxShadow = '';
+                });
+            });
+        });
+        
+        // Fit map to show all markers
+        if (markers.length > 0) {
+            var group = new L.featureGroup(markers);
+            map.fitBounds(group.getBounds().pad(0.1));
+        }
+    } else {
+        // No jobs with location data - show info message on map
+        L.popup()
+            .setLatLng([39.8283, -98.5795])
+            .setContent('<strong>No jobs with location data to display on map</strong>')
+            .openOn(map);
+    }
+    
+    // Add hover effect to job cards to highlight map markers
+    document.querySelectorAll('.job-card').forEach(function(card) {
+        card.addEventListener('mouseenter', function() {
+            var jobId = this.getAttribute('data-job-id');
+            var job = jobs.find(j => j.id == jobId);
+            if (job) {
+                // Flash the corresponding marker
+                this.style.backgroundColor = '#f8f9fa';
+            }
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.backgroundColor = '';
+        });
+    });
+</script>
+
+<style>
+    .job-card {
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .job-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .leaflet-popup-content {
+        margin: 10px;
+        line-height: 1.4;
+    }
+</style>
 {% endblock %}

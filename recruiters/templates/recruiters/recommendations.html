@@ -214,19 +214,29 @@
 
                 <div class="modal-body">
                     <input type="hidden" name="candidate_email" id="modalCandidateEmail">
-                    <input type="hidden" name="redirect_url" value="{{ request.path }}">
-
-                    <label class="form-label">Your Email</label>
-                    <input type="email" class="form-control mb-3" name="recruiter_email" required>
-
-                    <label class="form-label">Email Password</label>
-                    <input type="password" class="form-control mb-3" name="email_password" required>
-
-                    <label class="form-label">Subject</label>
-                    <input type="text" class="form-control mb-3" name="subject" required>
-
-                    <label class="form-label">Message</label>
-                    <textarea class="form-control" name="message_body" rows="6" required></textarea>
+                    <input type="hidden" name="redirect_url" value="{{ request.path }}"> 
+                    
+                    <div class="mb-3">
+                        <label for="recruiterEmail" class="form-label">Your Email Address (Required)</label>
+                        <input type="email" class="form-control" id="recruiterEmail" name="recruiter_email" 
+                            required 
+                            placeholder="Your email address (where the candidate should reply)"
+                            value="{{ request.user.email|default:'' }}"> 
+                    </div>
+                    <div class="mb-3">
+                        <label for="emailPassword" class="form-label">Email password (Required)</label>
+                        <input type="password" class="form-control" id="emailPassword" name="email_password"
+                            required
+                            placeholder="password"
+                            value="{{request.user.emailpassword|default:'' }}">
+                    <div class="mb-3">
+                        <label for="emailSubject" class="form-label">Subject</label>
+                        <input type="text" class="form-control" id="emailSubject" name="subject" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="emailBody" class="form-label">Message</label>
+                        <textarea class="form-control" id="emailBody" name="message_body" rows="6" required placeholder="Type your personalized message here..."></textarea>
+                    </div>
                 </div>
 
                 <div class="modal-footer">

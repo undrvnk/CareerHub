@@ -248,26 +248,17 @@
                     
                     <div class="mb-3">
                         <label for="recruiterEmail" class="form-label">Your Email Address (Required)</label>
-                        <input type="email"
-                               class="form-control"
-                               id="recruiterEmail"
-                               name="recruiter_email" 
-                               required 
-                               placeholder="Your email address (where the candidate should reply)"
-                               value="{{ request.user.email|default:'' }}">
+                        <input type="email" class="form-control" id="recruiterEmail" name="recruiter_email" 
+                            required 
+                            placeholder="Your email address (where the candidate should reply)"
+                            value="{{ request.user.email|default:'' }}"> 
                     </div>
-
                     <div class="mb-3">
                         <label for="emailPassword" class="form-label">Email password (Required)</label>
-                        <input type="password"
-                               class="form-control"
-                               id="emailPassword"
-                               name="email_password"
-                               required
-                               placeholder="password"
-                               value="{{ request.user.emailpassword|default:'' }}">
-                    </div>
-
+                        <input type="password" class="form-control" id="emailPassword" name="email_password"
+                            required
+                            placeholder="password"
+                            value="{{request.user.emailpassword|default:'' }}">
                     <div class="mb-3">
                         <label for="emailSubject" class="form-label">Subject</label>
                         <input type="text"
