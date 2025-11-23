@@ -1,84 +1,175 @@
 {% extends 'base.html' %}
 
+{% block extra_head %}
+<style>
+    /* Main profile card — green theme */
+    .profile-card {
+        background: #DFECC6 !important;
+        border-radius: 18px;
+        border: 1px solid #cbdab0;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+        padding: 25px;
+    }
+
+    /* Themed Edit Profile button */
+    .btn-edit {
+        background: #687a4c !important;
+        color: #fff !important;
+        border-radius: 10px;
+        border: none;
+        padding: 10px 22px;
+    }
+
+    .btn-edit:hover {
+        background: #55633e !important;
+        color: #fff !important;
+    }
+
+    /* Themed badges for skills */
+    .skill-badge {
+        background: #687a4c !important;
+        color: white !important;
+        border-radius: 8px;
+        padding: 6px 12px;
+        font-size: 0.85rem;
+    }
+
+    /* Replacing bootstrap alert colors */
+    .alert-visible {
+        background: #d9f2d0;
+        border-left: 6px solid #5c8c43;
+        border-radius: 10px;
+        color: #3a5f2e;
+        padding: 14px 18px;
+        font-size: 0.95rem;
+    }
+
+    .alert-hidden {
+        background: #fff3cd;
+        border-left: 6px solid #cc9a00;
+        border-radius: 10px;
+        color: #7a5a00;
+        padding: 14px 18px;
+        font-size: 0.95rem;
+    }
+
+    .profile-section-title {
+        color: #355e2c;
+        font-weight: 600;
+        margin-top: 15px;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container mt-4">
+
     {% if profile %}
-        <div class="row">
-            <div class="col-md-8 mx-auto">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center mb-4">
-                            <h1 class="card-title">{{ profile.user.username }}'s Profile</h1>
-                            <a href="{% url 'profiles.edit' %}" class="btn btn-primary">Edit Profile</a>
-                        </div>
-                        
-                        {% if not profile.profile_visible %}
-                        <div class="alert alert-warning">
-                            <i class="fas fa-eye-slash"></i> <strong>Your profile is currently hidden from recruiters.</strong>
-                            <br>Recruiters cannot see your profile in searches, recommendations, or browse listings.
-                            <a href="{% url 'profiles.edit' %}" class="alert-link">Change visibility settings</a>
-                        </div>
-                        {% else %}
-                        <div class="alert alert-success">
-                            <i class="fas fa-eye"></i> <strong>Your profile is visible to recruiters.</strong>
-                        </div>
-                        {% endif %}
-                        
-                        <h5 class="text-primary">
-                            Headline 
-                            {% if not profile.headline_public %}<i class="fas fa-lock text-muted"></i>{% endif %}
-                        </h5>
-                        <p class="mb-4">{{ profile.headline }}</p>
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="profile-card">
 
-                        <h5 class="text-primary">
-                            Skills 
-                            {% if not profile.skills_public %}<i class="fas fa-lock text-muted"></i>{% endif %}
-                        </h5>
-                        <div class="mb-4">
-                            {% for skill in profile.skills.all %}
-                                <span class="badge bg-secondary me-2">{{ skill.name }}</span>
-                            {% endfor %}
-                        </div>
-
-                        <h5 class="text-primary">
-                            Education 
-                            {% if not profile.education_public %}<i class="fas fa-lock text-muted"></i>{% endif %}
-                        </h5>
-                        <p class="mb-4">{{ profile.education|linebreaks }}</p>
-
-                        <h5 class="text-primary">
-                            GPA 
-                            {% if not profile.gpa_public %}<i class="fas fa-lock text-muted"></i>{% endif %}
-                        </h5>
-                        <p class="mb-4">{{ profile.gpa|linebreaks }}</p>
-
-                        <h5 class="text-primary">
-                            Work Experience 
-                            {% if not profile.work_experience_public %}<i class="fas fa-lock text-muted"></i>{% endif %}
-                        </h5>
-                        <p class="mb-4">{{ profile.work_experience|linebreaks }}</p>
-
-                        <h5 class="text-primary">
-                            Links 
-                            {% if not profile.links_public %}<i class="fas fa-lock text-muted"></i>{% endif %}
-                        </h5>
-                        <p class="mb-4">{{ profile.links|linebreaks }}</p>
-                        
-                        <h5 class="text-primary">
-                            Email 
-                            {% if not profile.email_public %}<i class="fas fa-lock text-muted"></i>{% endif %}
-                        </h5>
-                        <p>{{ profile.user.email }}</p>
-                    </div>
+                <!-- Header -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h1>{{ profile.user.username }}'s Profile</h1>
+                    <a href="{% url 'profiles.edit' %}" class="btn-edit">Edit Profile</a>
                 </div>
+
+                <!-- Visibility Alerts -->
+                {% if not profile.profile_visible %}
+                <div class="alert-hidden mb-4">
+                    <i class="fas fa-eye-slash"></i>
+                    <strong>Your profile is currently hidden from recruiters.</strong><br>
+                    Recruiters cannot see you in searches, recommendations, or listings.<br>
+                    <a href="{% url 'profiles.edit' %}" class="fw-bold text-decoration-underline">
+                        Change visibility settings
+                    </a>
+                </div>
+                {% else %}
+                <div class="alert-visible mb-4">
+                    <i class="fas fa-eye"></i>
+                    <strong>Your profile is visible to recruiters.</strong>
+                </div>
+                {% endif %}
+
+                <!-- Headline -->
+                <h5 class="profile-section-title">
+                    Headline
+                    {% if not profile.headline_public %}
+                        <i class="fas fa-lock text-muted"></i>
+                    {% endif %}
+                </h5>
+                <p class="mb-4">{{ profile.headline }}</p>
+
+                <!-- Skills -->
+                <h5 class="profile-section-title">
+                    Skills
+                    {% if not profile.skills_public %}
+                        <i class="fas fa-lock text-muted"></i>
+                    {% endif %}
+                </h5>
+                <div class="mb-4">
+                    {% for skill in profile.skills.all %}
+                        <span class="skill-badge me-2">{{ skill.name }}</span>
+                    {% endfor %}
+                </div>
+
+                <!-- Education -->
+                <h5 class="profile-section-title">
+                    Education
+                    {% if not profile.education_public %}
+                        <i class="fas fa-lock text-muted"></i>
+                    {% endif %}
+                </h5>
+                <p class="mb-4">{{ profile.education|linebreaks }}</p>
+
+                <!-- GPA -->
+                <h5 class="profile-section-title">
+                    GPA
+                    {% if not profile.gpa_public %}
+                        <i class="fas fa-lock text-muted"></i>
+                    {% endif %}
+                </h5>
+                <p class="mb-4">{{ profile.gpa|linebreaks }}</p>
+
+                <!-- Work Experience -->
+                <h5 class="profile-section-title">
+                    Work Experience
+                    {% if not profile.work_experience_public %}
+                        <i class="fas fa-lock text-muted"></i>
+                    {% endif %}
+                </h5>
+                <p class="mb-4">{{ profile.work_experience|linebreaks }}</p>
+
+                <!-- Links -->
+                <h5 class="profile-section-title">
+                    Links
+                    {% if not profile.links_public %}
+                        <i class="fas fa-lock text-muted"></i>
+                    {% endif %}
+                </h5>
+                <p class="mb-4">{{ profile.links|linebreaks }}</p>
+
+                <!-- Email -->
+                <h5 class="profile-section-title">
+                    Email
+                    {% if not profile.email_public %}
+                        <i class="fas fa-lock text-muted"></i>
+                    {% endif %}
+                </h5>
+                <p>{{ profile.user.email }}</p>
+
             </div>
         </div>
+    </div>
+
     {% else %}
-        <div class="text-center">
-            <h2>Create Your Profile</h2>
-            <p>Share your professional background with recruiters</p>
-            <a href="{% url 'profiles.edit' %}" class="btn btn-primary btn-lg">Create Profile</a>
-        </div>
+    <div class="text-center">
+        <h2>Create Your Profile</h2>
+        <p>Share your professional background with recruiters</p>
+        <a href="{% url 'profiles.edit' %}" class="btn-edit btn-lg">Create Profile</a>
+    </div>
     {% endif %}
+
 </div>
 {% endblock %}

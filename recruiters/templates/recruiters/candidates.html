@@ -1,71 +1,181 @@
 {% extends 'base.html' %}
 {% load custom_tags %}
 
+{% block extra_head %}
+<style>
+    /* FILTER CARD – match Available Jobs layout */
+    .filter-card {
+        background: #f5f5f5;
+        border-radius: 20px;
+        padding: 25px 25px 15px 25px;
+        margin-bottom: 30px;
+    }
+
+    .filter-card .input-group {
+        margin-bottom: 12px;
+    }
+
+    .filter-label {
+        min-width: 110px;
+        justify-content: center;
+    }
+
+    .filter-search-btn {
+        margin-top: 10px;
+        width: 100%;
+    }
+
+    @media (min-width: 992px) {
+        .filter-search-btn {
+            width: auto;
+        }
+    }
+
+    /* Candidate cards */
+    .candidate-card {
+        background: #DFECC6 !important;
+        border-radius: 18px;
+        border: 1px solid #cbdab0;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+        transition: transform 0.1s ease, box-shadow 0.1s ease;
+    }
+
+    .candidate-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 18px rgba(0,0,0,0.06);
+    }
+
+    /* Solid theme button */
+    .btn-theme {
+        background: #687a4c !important;
+        color: white !important;
+        border-radius: 10px;
+        border: none;
+        padding: 8px 18px;
+        font-size: 0.9rem;
+    }
+
+    .btn-theme:hover {
+        background: #55633e !important;
+        color: white !important;
+    }
+
+    /* Outline theme button */
+    .btn-outline-theme {
+        border: 1px solid #687a4c !important;
+        color: #687a4c !important;
+        border-radius: 10px;
+        padding: 7px 16px;
+        font-size: 0.9rem;
+    }
+
+    .btn-outline-theme:hover {
+        background: #687a4c !important;
+        color: white !important;
+    }
+
+    .saved-search-link {
+        text-decoration: none;
+    }
+
+    .saved-search-link:hover {
+        text-decoration: underline;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container mt-5">
+<div class="container mt-5 mb-5">
     <h1>Candidates</h1>
+
     <div class="row mt-4">
         {% if saved_searches %}
             <h3>Saved Searches</h3>
             {% for search in saved_searches %}
             <p>
-                <a href="{% url 'recruiters.candidates' %}?search_name={{search.name}}&search_skill={{search.skill}}&search_education={{search.education}}&search_experience={{search.experience}}&search_id={{search.id}}">
+                <a class="saved-search-link"
+                   href="{% url 'recruiters.candidates' %}?search_name={{search.name}}&search_skill={{search.skill}}&search_education={{search.education}}&search_experience={{search.experience}}&search_id={{search.id}}">
                     {% if search.name %}
-                        Name: {{search.name}}, 
+                        Name: {{search.name}},
                     {% endif %}
-                    {% if search.skill %} 
-                        Skill: {{search.skill}}, 
+                    {% if search.skill %}
+                        Skill: {{search.skill}},
                     {% endif %}
-                    {% if search.education %} 
-                        Education: {{search.education}}, 
+                    {% if search.education %}
+                        Education: {{search.education}},
                     {% endif %}
-                    {% if search.experience %} 
-                        Experience: {{search.experience}}, 
+                    {% if search.experience %}
+                        Experience: {{search.experience}},
                     {% endif %}
                     {% if search.new_results > search.result_count %}
-                    ({{search.new_results|subtract:search.result_count}} new profile){% endif %}</a>
-                    ---
-                    <a href="{% url 'recruiters.delete_search' search.id %}">Delete</a>
+                        ({{search.new_results|subtract:search.result_count}} new profile)
+                    {% endif %}
+                </a>
+                --- <a href="{% url 'recruiters.delete_search' search.id %}">Delete</a>
             </p>
             {% endfor %}
         {% endif %}
-        <h3>Keyword Search</h3>
-        <form method="GET">
-            <div class="row">
-                <div class="col-auto">
-                    <div class="input-group col-auto">
-                        <div class="input-group-text">Name</div>
-                        <input type="text" class="form-control" name="search_name">
+
+        <!-- FILTER CARD (matches Available Jobs style) -->
+        <div class="filter-card mt-2">
+            <h3 class="mb-3">Keyword Search</h3>
+            <form method="GET">
+                <div class="row g-3">
+                    <div class="col-lg-9">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="input-group">
+                                    <span class="input-group-text filter-label">Name</span>
+                                    <input type="text" class="form-control" name="search_name" placeholder="e.g. John Doe">
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="input-group">
+                                    <span class="input-group-text filter-label">Skill</span>
+                                    <input type="text" class="form-control" name="search_skill" placeholder="e.g. Python, React">
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="input-group">
+                                    <span class="input-group-text filter-label">Education</span>
+                                    <input type="text" class="form-control" name="search_education" placeholder="e.g. Computer Science">
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="input-group">
+                                    <span class="input-group-text filter-label">Experience</span>
+                                    <input type="text" class="form-control" name="search_experience" placeholder="e.g. 2+ years">
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="input-group col-auto">
-                        <div class="input-group-text">Skill</div>
-                        <input type="text" class="form-control" name="search_skill">
-                    </div>
-                    <div class="input-group col-auto">
-                        <div class="input-group-text">Education</div>
-                        <input type="text" class="form-control" name="search_education">
-                    </div>
-                    <div class="input-group col-auto">
-                        <div class="input-group-text">Experience</div>
-                        <input type="text" class="form-control" name="search_experience">
+
+                    <div class="col-lg-3 d-flex flex-column justify-content-end align-items-lg-end">
+                        <button class="btn btn-dark filter-search-btn mb-2" type="submit">
+                            Search
+                        </button>
+
+                        {% if valid_search %}
+                            <a href="{% url 'recruiters.save_search' %}?name={{name}}&skill={{skill}}&education={{education}}&experience={{experience}}&results={{results}}"
+                               class="btn-outline-theme filter-search-btn text-center">
+                                Save Search Inputs
+                            </a>
+                        {% endif %}
                     </div>
                 </div>
-                <div class="col-auto">
-                    <button class="btn bg-dark text-white" type="submit">Search</button><br><br>
-                    {% if valid_search %}
-                    <a href="{% url 'recruiters.save_search' %}?name={{name}}&skill={{skill}}&education={{education}}&experience={{experience}}&results={{results}}" class="btn bg-dark text-white">
-                        Save Search Inputs
-                    </a>
-                    {% endif %}
-                </div>
-            </div>
-        </form>
+            </form>
+        </div>
+
+        <!-- CANDIDATE CARDS -->
         {% for profile in candidates %}
         <div class="col-md-6 mb-4">
-            <div class="card">
+            <div class="card candidate-card">
                 <div class="card-body">
                     {% if profile.user %}
-                        <h5 class="card-title">{{ profile.user.last_name }}, {{profile.user.first_name }}</h5>
+                        <h5 class="card-title">{{ profile.user.last_name }}, {{ profile.user.first_name }}</h5>
                         {% if profile.headline_public %}
                             <h6 class="card-subtitle mb-2 text-muted">{{ profile.headline }}</h6>
                         {% endif %}
@@ -84,40 +194,52 @@
                     {% endif %}
                     
                     {% if profile.skills_public %}
-                        <p class="card-text"><u>Skills:</u>
-                        {% for skill in profile.skills.all %}
-                            <br>{{ skill.name }}
-                        {% endfor %}
+                        <p class="card-text">
+                            <u>Skills:</u>
+                            {% for skill in profile.skills.all %}
+                                <br>{{ skill.name }}
+                            {% endfor %}
                         </p>
                     {% endif %}
                     
-                    <br><a href="{% url 'inbox.compose' profile.user.id%}" class="btn btn-sm btn-outline-primary mt-2">
-                        Send Message
-                    </a>
-                    {% if profile.email_public and profile.user.email %}
-                    <br><a href="#" class="btn btn-sm btn-outline-primary mt-2"
-                    data-bs-toggle="modal"
-                    data-bs-target="#emailCandidateModal"
-                    data-candidate-email="{{ profile.user.email }}"
-                    data-candidate-name="{{ profile.user.first_name }} {{ profile.user.last_name }}">
-                        Email Candidate
-                    </a>
-                    {% else %}
-                    <span class="text-muted mt-2 d-block">Email not available for this candidate.</span>
-                    {% endif %}
+                    <div class="mt-2">
+                        <a href="{% url 'inbox.compose' profile.user.id %}"
+                           class="btn-view-details btn-sm me-2">
+                            Send Message
+                        </a>
+
+                        {% if profile.email_public and profile.user.email %}
+                            <a href="#"
+                               class="btn-view-details btn-sm mt-2 mt-sm-0"
+                               data-bs-toggle="modal"
+                               data-bs-target="#emailCandidateModal"
+                               data-candidate-email="{{ profile.user.email }}"
+                               data-candidate-name="{{ profile.user.first_name }} {{ profile.user.last_name }}">
+                                Email Candidate
+                            </a>
+                        {% else %}
+                            <span class="text-muted mt-2 d-block">Email not available for this candidate.</span>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         </div>
         {% endfor %}
     </div>
 </div>
+
+<!-- EMAIL MODAL -->
 <div class="modal fade" id="emailCandidateModal" tabindex="-1" aria-labelledby="emailCandidateModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
+
             <div class="modal-header">
-                <h5 class="modal-title" id="emailCandidateModalLabel">Email <span id="candidateNameSpan">Candidate</span></h5>
+                <h5 class="modal-title" id="emailCandidateModalLabel">
+                    Email <span id="candidateNameSpan">Candidate</span>
+                </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
+
             <form method="POST" action="{% url 'recruiters.email_candidate' %}">
                 {% csrf_token %}
                 <div class="modal-body">
@@ -128,23 +250,48 @@
                         <label for="recruiterEmail" class="form-label">Your Email Address (Required)</label>
                         <input type="email" class="form-control" id="recruiterEmail" name="recruiter_email" 
                             required 
-                            placeholder="Your email address (you will be CC'd on this email)"
+                            placeholder="Your email address (where the candidate should reply)"
                             value="{{ request.user.email|default:'' }}"> 
                     </div>
                     <div class="mb-3">
+                        <label for="emailPassword" class="form-label">Email password (Required)</label>
+                        <input type="password" class="form-control" id="emailPassword" name="email_password"
+                            required
+                            placeholder="password"
+                            value="{{request.user.emailpassword|default:'' }}">
+                    <div class="mb-3">
                         <label for="emailSubject" class="form-label">Subject</label>
-                        <input type="text" class="form-control" id="emailSubject" name="subject" required>
+                        <input type="text"
+                               class="form-control"
+                               id="emailSubject"
+                               name="subject"
+                               required>
                     </div>
+
                     <div class="mb-3">
                         <label for="emailBody" class="form-label">Message</label>
-                        <textarea class="form-control" id="emailBody" name="message_body" rows="6" required placeholder="Type your personalized message here..."></textarea>
+                        <textarea class="form-control"
+                                  id="emailBody"
+                                  name="message_body"
+                                  rows="6"
+                                  required
+                                  placeholder="Type your personalized message here..."></textarea>
                     </div>
                 </div>
+
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary">Send Email</button>
+                    <button type="button"
+                            class="btn-outline-theme"
+                            data-bs-dismiss="modal">
+                        Close
+                    </button>
+                    <button type="submit"
+                            class="btn-theme">
+                        Send Email
+                    </button>
                 </div>
             </form>
+
         </div>
     </div>
 </div>
@@ -155,7 +302,6 @@
         if (emailModal) {
             emailModal.addEventListener('show.bs.modal', function (event) {
                 const button = event.relatedTarget;
-                
                 const email = button.getAttribute('data-candidate-email');
                 const name = button.getAttribute('data-candidate-name');
 

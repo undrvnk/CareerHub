@@ -1,36 +1,88 @@
 {% extends 'base.html' %}
 
+{% block extra_head %}
+<style>
+    /* Themed job cards */
+    .jobpost-card {
+        background: #DFECC6 !important;
+        border-radius: 18px;
+        border: 1px solid #cbdab0;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+        transition: transform 0.1s ease, box-shadow 0.1s ease;
+    }
+
+    .jobpost-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 18px rgba(0,0,0,0.06);
+    }
+
+    /* Main green button */
+    .btn-theme {
+        background: #687a4c !important;
+        color: white !important;
+        border-radius: 10px;
+        border: none;
+        padding: 8px 18px;
+        font-size: 0.9rem;
+    }
+
+    .btn-theme:hover {
+        background: #55633e !important;
+        color: white !important;
+    }
+
+    /* Outline version */
+    .btn-outline-theme {
+        border: 1px solid #687a4c !important;
+        color: #687a4c !important;
+        border-radius: 10px;
+        padding: 7px 16px;
+        font-size: 0.9rem;
+    }
+
+    .btn-outline-theme:hover {
+        background: #687a4c !important;
+        color: white !important;
+    }
+
+    /* Clean soft-danger delete button */
+    .btn-danger-soft {
+        background: #e6b3b3 !important;
+        border: 1px solid #cc9a9a;
+        border-radius: 10px;
+        color: #7a2a2a !important;
+        padding: 7px 16px;
+        font-size: 0.9rem;
+    }
+
+    .btn-danger-soft:hover {
+        background: #d99a9a !important;
+        color: #ffffff !important;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container mt-5">
     <h1>Available Jobs</h1>
+
     <div class="row mt-4">
         {% for post in posts %}
         <div class="col-md-6 mb-4">
-            <div class="card">
+            <div class="card jobpost-card">
                 <div class="card-body">
                     <h5 class="card-title">{{ post.title }}</h5>
                     <h6 class="card-subtitle mb-2 text-muted">{{ post.company }}</h6>
+
                     <p class="card-text">{{ post.description|truncatewords:30 }}</p>
-            {% if user.is_authenticated and user == post.recruiter %}
 
-            <a class="btn btn-info"
-                       href="{% url 'recruiters.detail' id=post.id %}">
-                       View
-                    </a>
+                    {% if user.is_authenticated and user == post.recruiter %}
+                        <a href="{% url 'recruiters.detail' id=post.id %}" class="btn-outline-theme me-2">View</a>
 
-            <a class="btn btn-primary"
+                        <a href="{% url 'recruiters.edit' id=post.id %}" class="btn-theme me-2">Edit</a>
 
-              href="{% url 'recruiters.edit' id=post.id %}">Edit
-
-            </a>
-
-            <a class="btn btn-danger"
-
-              href="{% url 'recruiters.delete' id=post.id %}">Delete
-
-            </a>
-
-            {% endif %}
+                        <a href="{% url 'recruiters.delete' id=post.id %}" class="btn-danger-soft">Delete</a>
+                    {% endif %}
                 </div>
             </div>
         </div>

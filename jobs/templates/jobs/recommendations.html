@@ -1,5 +1,55 @@
 {% extends 'base.html' %}
 
+{% block extra_head %}
+<style>
+    /* Light green background box */
+    .recommend-card {
+        background: #DFECC6 !important;
+        border-radius: 18px;
+        border: 1px solid #cbdab0;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+        transition: transform 0.1s ease, box-shadow 0.1s ease;
+    }
+
+    .recommend-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 18px rgba(0,0,0,0.06);
+    }
+
+    /* Percentage match badge */
+    .match-badge {
+        background-color: #687a4c !important;
+        padding: 6px 10px;
+        font-size: 0.85rem;
+    }
+
+    /* Skill badges */
+    .skill-badge {
+        background: #687a4c !important;
+        color: white !important;
+        border-radius: 8px;
+        padding: 5px 10px;
+        font-size: 0.8rem;
+    }
+
+    /* Themed update profile button — fixed padding */
+    .btn-profile-update {
+        background: #687a4c !important;
+        color: white !important;
+        border-radius: 10px;
+        border: none;
+        padding: 10px 22px;      /* FIXED */
+        font-size: 0.95rem;
+        margin-top: 10px;        /* FIXED spacing */
+        display: inline-block;
+    }
+
+    .btn-profile-update:hover {
+        background: #55633e !important;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container mt-5">
     <h1>Recommended Jobs for You</h1>
@@ -9,14 +59,17 @@
         {% if job_matches %}
             {% for match in job_matches %}
             <div class="col-md-6 mb-4">
-                <div class="card h-100">
+                <div class="card h-100 recommend-card">
                     <div class="card-body">
+
                         <div class="d-flex justify-content-between align-items-start mb-2">
                             <div>
                                 <h5 class="card-title">{{ match.job.title }}</h5>
                                 <h6 class="card-subtitle mb-2 text-muted">{{ match.job.company }}</h6>
                             </div>
-                            <span class="badge bg-success">{{ match.match_percentage|floatformat:0 }}% Match</span>
+                            <span class="badge match-badge">
+                                {{ match.match_percentage|floatformat:0 }}% Match
+                            </span>
                         </div>
                         
                         <p class="card-text">{{ match.job.description|truncatewords:30 }}</p>
@@ -29,22 +82,30 @@
                             <strong>Matched Skills ({{ match.match_count }}/{{ match.total_required }}):</strong>
                             <div class="mt-2">
                                 {% for skill in match.matched_skills %}
-                                    <span class="badge bg-primary me-1">{{ skill.name }}</span>
+                                    <span class="badge skill-badge me-1">{{ skill.name }}</span>
                                 {% endfor %}
                             </div>
                         </div>
                         
-                        <a href="{% url 'jobs.detail' match.job.id %}" class="btn btn-primary">View Details</a>
+                        <a href="{% url 'jobs.detail' match.job.id %}" class="btn-view-details">
+                            View Details
+                        </a>
+
                     </div>
                 </div>
             </div>
             {% endfor %}
         {% else %}
             <div class="col-12">
-                <div class="alert alert-info">
+                <div class="recommend-card p-4">
                     <h5>No recommendations found</h5>
-                    <p>We couldn't find any jobs that match your skills. Try adding more skills to your profile or check back later for new job postings.</p>
-                    <a href="{% url 'profiles.view' %}" class="btn btn-primary">Update Your Profile</a>
+                    <p>
+                        We couldn't find any jobs that match your skills.
+                        Try adding more skills to your profile or check back later for new job postings.
+                    </p>
+                    <a href="{% url 'profiles.view' %}" class="btn-profile-update">
+                        Update Your Profile
+                    </a>
                 </div>
             </div>
         {% endif %}

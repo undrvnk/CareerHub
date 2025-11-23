@@ -1,23 +1,55 @@
 {% extends 'base.html' %}
 
+{% block extra_head %}
+<style>
+    .hero-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 80px;
+        font-weight: 400;
+        text-align: center;
+        margin-top: 80px;
+        margin-bottom: 40px;
+    }
+
+    .placeholder-box {
+        background: #8e9972;
+        width: 90%;
+        border-radius: 25px;
+        margin: 0 auto;
+        padding: 50px;
+        color: white;
+        text-align: center;
+    }
+
+    .placeholder-box h2 {
+        font-family: 'Playfair Display', serif;
+        font-size: 40px;
+        margin-bottom: 20px;
+    }
+
+    .placeholder-box p {
+        font-size: 18px;
+        margin-bottom: 15px;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container-fluid p-5 bg-primary text-white text-center">
-    <h1>Welcome to CareerHub</h1>
-    <p class="lead">Your Gateway to Professional Opportunities</p>
+
+<h1 class="hero-title">Find a tutor for you.</h1>
+
+<!-- GREEN BOX WITH CONTENT INSIDE -->
+<div class="placeholder-box">
+    <h2>Find Your Dream Job</h2>
+    <p class="lead">
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+    </p>
+    <p>
+        Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+        Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+    </p>
+
+    <a href="{% url 'jobs.index' %}" class="btn btn-light btn-lg mt-3">Browse Jobs</a>
 </div>
 
-<div class="container mt-5">
-    <div class="row">
-        <div class="col-md-8 mx-auto text-center">
-            <h2>Find Your Dream Job</h2>
-            <p class="lead">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-            </p>
-            <p>
-                Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
-            </p>
-            <a href="{% url 'jobs.index' %}" class="btn btn-primary btn-lg mt-3">Browse Jobs</a>
-        </div>
-    </div>
-</div>
 {% endblock %}

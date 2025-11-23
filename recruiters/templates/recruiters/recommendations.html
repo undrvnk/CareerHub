@@ -1,38 +1,127 @@
 {% extends 'base.html' %}
 
+{% block extra_head %}
+<style>
+    /* Light green candidate cards */
+    .candidate-card {
+        background: #DFECC6 !important;
+        border-radius: 18px;
+        border: 1px solid #cbdab0;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+        transition: transform 0.1s ease, box-shadow 0.1s ease;
+        padding-bottom: 20px;
+    }
+
+    .candidate-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 18px rgba(0,0,0,0.06);
+    }
+
+    /* Percentage match badge */
+    .match-badge {
+        background-color: #687a4c !important;
+        padding: 6px 10px;
+        font-size: 0.85rem;
+    }
+
+    /* Skill badges */
+    .skill-badge {
+        background: #687a4c !important;
+        color: white !important;
+        border-radius: 8px;
+        padding: 5px 10px;
+        font-size: 0.8rem;
+    }
+
+    /* Solid green button */
+    .btn-theme {
+        background: #687a4c !important;
+        color: white !important;
+        border-radius: 10px;
+        border: none;
+        padding: 10px 22px;
+        font-size: 0.9rem;
+        margin-top: 8px;
+    }
+
+    .btn-theme:hover {
+        background: #55633e !important;
+    }
+
+    /* Outline green button */
+    .btn-outline-theme {
+        border: 1px solid #687a4c !important;
+        color: #687a4c !important;
+        border-radius: 10px;
+        padding: 7px 16px;
+        font-size: 0.85rem;
+        margin-top: 10px; /* FIX: added spacing so they don’t touch */
+        display: inline-block;
+        width: auto;
+    }
+
+    .btn-outline-theme:hover {
+        background: #687a4c !important;
+        color: white !important;
+    }
+
+    /* Empty state card */
+    .no-recs-card {
+        background: #DFECC6;
+        border-radius: 18px;
+        border: 1px solid #cbdab0;
+        padding: 20px 24px;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container mt-5">
+
     <h1>Recommended Candidates</h1>
     <p class="text-muted">Candidates are ranked by their best skill match across all your job postings</p>
-    
+
     <div class="row mt-4">
         {% if recommendations %}
             {% for rec in recommendations %}
             <div class="col-md-6 mb-4">
-                <div class="card h-100">
+                <div class="card candidate-card h-100">
                     <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-start mb-2">
+
+                        <!-- Top row -->
+                        <div class="d-flex justify-content-between align-items-start mb-3">
                             <div>
-                                <h5 class="card-title">{{ rec.candidate.user.first_name }} {{ rec.candidate.user.last_name }}</h5>
+                                <h5 class="card-title">
+                                    {{ rec.candidate.user.first_name }} {{ rec.candidate.user.last_name }}
+                                </h5>
+
                                 {% if rec.candidate.headline_public %}
-                                    <h6 class="card-subtitle mb-2 text-muted">{{ rec.candidate.headline }}</h6>
+                                    <h6 class="card-subtitle text-muted">{{ rec.candidate.headline }}</h6>
                                 {% else %}
-                                    <h6 class="card-subtitle mb-2 text-muted"><i class="fas fa-lock"></i> Headline hidden</h6>
+                                    <h6 class="card-subtitle text-muted">
+                                        <i class="fas fa-lock"></i> Headline hidden
+                                    </h6>
                                 {% endif %}
                             </div>
-                            <span class="badge bg-success">{{ rec.best_match.match_percentage|floatformat:0 }}% Match</span>
+
+                            <span class="badge match-badge">
+                                {{ rec.best_match.match_percentage|floatformat:0 }}% Match
+                            </span>
                         </div>
-                        
+
+                        <!-- Best match info -->
                         <div class="mb-3">
-                            <strong>Best Match:</strong> {{ rec.best_match.job.title }} at {{ rec.best_match.job.company }}
+                            <strong>Best Match:</strong>
+                            {{ rec.best_match.job.title }} at {{ rec.best_match.job.company }}
                         </div>
-                        
+
+                        <!-- Skills -->
                         {% if rec.candidate.skills_public %}
                             <div class="mb-3">
                                 <strong>Matched Skills ({{ rec.best_match.match_count }}/{{ rec.best_match.total_required }}):</strong>
                                 <div class="mt-2">
                                     {% for skill in rec.best_match.matched_skills %}
-                                        <span class="badge bg-primary me-1">{{ skill.name }}</span>
+                                        <span class="badge skill-badge me-1">{{ skill.name }}</span>
                                     {% endfor %}
                                 </div>
                             </div>
@@ -41,7 +130,8 @@
                                 <strong>Skills:</strong> <i class="fas fa-lock"></i> Hidden by user
                             </div>
                         {% endif %}
-                        
+
+                        <!-- Education -->
                         <div class="mb-3">
                             <strong>Education:</strong>
                             {% if rec.candidate.education_public %}
@@ -50,7 +140,8 @@
                                 <p class="card-text text-muted"><i class="fas fa-lock"></i> Hidden by user</p>
                             {% endif %}
                         </div>
-                        
+
+                        <!-- Experience -->
                         <div class="mb-3">
                             <strong>Work Experience:</strong>
                             {% if rec.candidate.work_experience_public %}
@@ -59,52 +150,68 @@
                                 <p class="card-text text-muted"><i class="fas fa-lock"></i> Hidden by user</p>
                             {% endif %}
                         </div>
-                        
-                        <a href="{% url 'recruiters.detail' rec.best_match.job.id %}" class="btn btn-primary me-2">View Job Posting</a>
-                        <br><a href="{% url 'inbox.compose' rec.candidate.user.id %}" class="btn btn-sm btn-outline-primary mt-2">
+
+                        <!-- Buttons (FIXED SPACING) -->
+                        <a href="{% url 'recruiters.detail' rec.best_match.job.id %}" class="btn-theme">
+                            View Job Posting
+                        </a>
+
+                        <a href="{% url 'inbox.compose' rec.candidate.user.id %}"
+                           class="btn-outline-theme">
                             Send Message
                         </a>
+
                         {% if rec.candidate.email_public and rec.candidate.user.email %}
-                        <br><a href="#" class="btn btn-sm btn-outline-primary mt-2"
-                        data-bs-toggle="modal"
-                        data-bs-target="#emailCandidateModal"
-                        data-candidate-email="{{ rec.candidate.user.email }}"
-                        data-candidate-name="{{ rec.candidate.user.first_name }} {{ rec.candidate.user.last_name }}">
+                        <a href="#"
+                           class="btn-outline-theme"
+                           data-bs-toggle="modal"
+                           data-bs-target="#emailCandidateModal"
+                           data-candidate-email="{{ rec.candidate.user.email }}"
+                           data-candidate-name="{{ rec.candidate.user.first_name }} {{ rec.candidate.user.last_name }}">
                             Email Candidate
                         </a>
                         {% endif %}
+
                     </div>
                 </div>
             </div>
             {% endfor %}
         {% else %}
+
             <div class="col-12">
-                <div class="alert alert-info">
+                <div class="no-recs-card">
                     <h5>No recommendations found</h5>
                     <p>
                         {% if not user.post_set.exists %}
                             You don't have any job postings yet. Create a job posting to get candidate recommendations.
                             <br><br>
-                            <a href="{% url 'recruiters.create' %}" class="btn btn-primary">Create Job Posting</a>
+                            <a href="{% url 'recruiters.create' %}" class="btn-theme">
+                                Create Job Posting
+                            </a>
                         {% else %}
-                            We couldn't find any candidates matching your job requirements. Check back later as more candidates join the platform.
+                            No candidate matches found. Check back later!
                         {% endif %}
                     </p>
                 </div>
             </div>
+
         {% endif %}
     </div>
 </div>
 
-<div class="modal fade" id="emailCandidateModal" tabindex="-1" aria-labelledby="emailCandidateModalLabel" aria-hidden="true">
+<!-- EMAIL MODAL -->
+<div class="modal fade" id="emailCandidateModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
+
             <div class="modal-header">
-                <h5 class="modal-title" id="emailCandidateModalLabel">Email <span id="candidateNameSpan">Candidate</span></h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h5>Email <span id="candidateNameSpan"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
+
             <form method="POST" action="{% url 'recruiters.email_candidate' %}">
                 {% csrf_token %}
+
                 <div class="modal-body">
                     <input type="hidden" name="candidate_email" id="modalCandidateEmail">
                     <input type="hidden" name="redirect_url" value="{{ request.path }}"> 
@@ -113,9 +220,15 @@
                         <label for="recruiterEmail" class="form-label">Your Email Address (Required)</label>
                         <input type="email" class="form-control" id="recruiterEmail" name="recruiter_email" 
                             required 
-                            placeholder="Your email address (you will be CC'd on this email)"
+                            placeholder="Your email address (where the candidate should reply)"
                             value="{{ request.user.email|default:'' }}"> 
                     </div>
+                    <div class="mb-3">
+                        <label for="emailPassword" class="form-label">Email password (Required)</label>
+                        <input type="password" class="form-control" id="emailPassword" name="email_password"
+                            required
+                            placeholder="password"
+                            value="{{request.user.emailpassword|default:'' }}">
                     <div class="mb-3">
                         <label for="emailSubject" class="form-label">Subject</label>
                         <input type="text" class="form-control" id="emailSubject" name="subject" required>
@@ -125,32 +238,30 @@
                         <textarea class="form-control" id="emailBody" name="message_body" rows="6" required placeholder="Type your personalized message here..."></textarea>
                     </div>
                 </div>
+
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary">Send Email</button>
+                    <button type="button" class="btn-outline-theme" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn-theme">Send Email</button>
                 </div>
             </form>
+
         </div>
     </div>
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const emailModal = document.getElementById('emailCandidateModal');
-        if (emailModal) {
-            emailModal.addEventListener('show.bs.modal', function (event) {
-                const button = event.relatedTarget;
-                
-                const email = button.getAttribute('data-candidate-email');
-                const name = button.getAttribute('data-candidate-name');
+document.addEventListener("DOMContentLoaded", function () {
+    const modal = document.getElementById("emailCandidateModal");
 
-                const nameSpan = emailModal.querySelector('#candidateNameSpan');
-                const emailInput = emailModal.querySelector('#modalCandidateEmail');
+    modal.addEventListener("show.bs.modal", function (event) {
+        const button = event.relatedTarget;
+        modal.querySelector("#candidateNameSpan").textContent =
+            button.getAttribute("data-candidate-name");
 
-                nameSpan.textContent = name;
-                emailInput.value = email;
-            });
-        }
+        modal.querySelector("#modalCandidateEmail").value =
+            button.getAttribute("data-candidate-email");
     });
+});
 </script>
+
 {% endblock %}
