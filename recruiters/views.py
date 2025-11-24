@@ -109,10 +109,9 @@ def create(request):
             skill, _ = Skill.objects.get_or_create(name=skill_name)
             post.required_skills.add(skill)
 
-        posts = Post.objects.all().order_by('-created_at')
-        return render(request, 'recruiters/index.html', {'posts': posts})
+        return redirect('recruiters.index')
 
-    return render(request, 'recruiters.html')
+    return render(request, 'recruiters/create.html')
 
 
 # @login_required
