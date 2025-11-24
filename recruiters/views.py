@@ -21,7 +21,11 @@ from profiles.models import Profile # <--- REQUIRED FOR MAP
 from accounts.models import User as UserAccount
 
 def index(request):
-    posts = Post.objects.all().order_by('-created_at')
+    # Recruiters should only see their own job postings
+    if request.user.is_authenticated and request.user.role == "recruiter":
+        posts = Post.objects.filter(recruiter=request.user).order_by('-created_at')
+    else:
+        posts = Post.objects.all().order_by('-created_at')
     return render(request, 'recruiters/index.html', {'posts': posts})
 
 
