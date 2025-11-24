@@ -113,7 +113,7 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Location</label>
-                            <input type="text" class="form-control" name="search_location" value="{{ location|default:'' }}">
+                            <input type="text" class="form-control" id="search_location" name="search_location" value="{{ location|default:'' }}">
                             <small class="text-muted">Search by location text (e.g., "New York")</small>
                         </div>
                         <div class="mb-3">
@@ -137,7 +137,7 @@
                         <!-- Hidden inputs for map-selected location -->
                         <input type="hidden" name="filter_lat" id="filter_lat" value="{{ filter_lat|default:'' }}">
                         <input type="hidden" name="filter_lng" id="filter_lng" value="{{ filter_lng|default:'' }}">
-                        <button class="btn btn-success w-100" type="submit">
+                        <button class="btn btn-success w-100" type="button" id="search-jobs-btn">
                             <i class="fas fa-search"></i> Search Jobs
                         </button>
                     </form>
@@ -336,6 +336,74 @@
         card.addEventListener('mouseleave', function() {
             this.style.backgroundColor = '';
         });
+    });
+    
+    // Combined search and geocoding functionality
+    document.getElementById('search-jobs-btn').addEventListener('click', function(e) {
+        e.preventDefault();
+        var locationInput = document.getElementById('search_location');
+        var location = locationInput.value.trim();
+        var form = locationInput.form;
+        var btn = this;
+        var originalBtnText = btn.innerHTML;
+        
+        // If location field has a value, geocode it first
+        if (location) {
+            // Show loading state
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Finding location...';
+            
+            // Use Nominatim API to geocode the location
+            fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(location)}&format=json&limit=1`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    btn.disabled = false;
+                    btn.innerHTML = originalBtnText;
+                    
+                    if (data && data.length > 0) {
+                        var result = data[0];
+                        var lat = parseFloat(result.lat);
+                        var lng = parseFloat(result.lon);
+                        
+                        // Validate coordinates
+                        if (isNaN(lat) || isNaN(lng)) {
+                            alert('Invalid coordinates returned. Please try again.');
+                            return;
+                        }
+                        
+                        // Set the hidden filter fields
+                        document.getElementById('filter_lat').value = lat;
+                        document.getElementById('filter_lng').value = lng;
+                        
+                        // Submit the form
+                        form.submit();
+                    } else {
+                        alert('Location not found. Please try a different search.');
+                    }
+                })
+                .catch(error => {
+                    btn.disabled = false;
+                    btn.innerHTML = originalBtnText;
+                    console.error('Error geocoding location:', error);
+                    alert('Error finding location. Please check your internet connection and try again.');
+                });
+        } else {
+            // No location entered, just submit the form
+            form.submit();
+        }
+    });
+    
+    // Also trigger search on Enter key in location field
+    document.getElementById('search_location').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            document.getElementById('search-jobs-btn').click();
+        }
     });
 </script>
 

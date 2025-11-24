@@ -68,12 +68,17 @@ def index(request):
     filter_center_lat = user_lat
     filter_center_lng = user_lng
     
-    if filter_lat and filter_lng:
+    # Only use filter_lat/filter_lng if location_term is provided (to avoid stale coordinates)
+    if location_term and filter_lat and filter_lng:
         try:
             filter_center_lat = float(filter_lat)
             filter_center_lng = float(filter_lng)
         except ValueError:
             pass
+    else:
+        # Reset filter coordinates if no location term is present
+        filter_lat = None
+        filter_lng = None
     
     # Filter by distance if max_distance is specified
     if max_distance:
