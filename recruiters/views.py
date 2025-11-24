@@ -112,7 +112,7 @@ def create(request):
         posts = Post.objects.all().order_by('-created_at')
         return render(request, 'recruiters/index.html', {'posts': posts})
 
-    return render(request, 'recruiters/create.html')
+    return render(request, 'recruiters.html')
 
 
 # @login_required
