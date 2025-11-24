@@ -141,10 +141,12 @@
                             <li class="nav-item"><a class="nav-link" href="{% url 'recruiters.create' %}">Post Job</a></li>
                             <li class="nav-item"><a class="nav-link" href="{% url 'recruiters.recommendations' %}">Recommendations</a></li>
                             <li class="nav-item"><a class="nav-link" href="{% url 'recruiters.candidates' %}">Browse Candidates</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{% url 'inbox.index' %}">Inbox</a></li>
                         {% else %}
                             <li class="nav-item"><a class="nav-link" href="{% url 'profiles.view' %}">Profile</a></li>
                             <li class="nav-item"><a class="nav-link" href="{% url 'jobs.recommendations' %}">Recommendations</a></li>
                             <li class="nav-item"><a class="nav-link" href="{% url 'jobs.applications' %}">Applications</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{% url 'inbox.index' %}">Inbox</a></li>
                         {% endif %}
 
                     {% endif %}

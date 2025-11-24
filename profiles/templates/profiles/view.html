@@ -101,6 +101,15 @@
                 </h5>
                 <p class="mb-4">{{ profile.headline }}</p>
 
+                <!-- Location -->
+                <h5 class="profile-section-title">
+                    <i class="fas fa-map-marker-alt"></i> Location
+                    {% if not profile.location_public %}
+                        <i class="fas fa-lock text-muted"></i>
+                    {% endif %}
+                </h5>
+                <p class="mb-4">{{ profile.location|default:"Not specified" }}</p>
+
                 <!-- Skills -->
                 <h5 class="profile-section-title">
                     Skills
