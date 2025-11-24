@@ -112,11 +112,6 @@
                             <input type="text" class="form-control" name="search_skill" value="{{ skill|default:'' }}">
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Location</label>
-                            <input type="text" class="form-control" id="search_location" name="search_location" value="{{ location|default:'' }}">
-                            <small class="text-muted">Search by location text (e.g., "New York")</small>
-                        </div>
-                        <div class="mb-3">
                             <label class="form-label">Salary</label>
                             <input type="text" class="form-control" name="search_salary" value="{{ salary|default:'' }}">
                         </div>
@@ -127,6 +122,11 @@
                         <div class="mb-3">
                             <label class="form-label">Visa Sponsorship</label>
                             <input type="text" class="form-control" name="search_visa" value="{{ visa|default:'' }}">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Location</label>
+                            <input type="text" class="form-control" id="search_location" name="search_location" value="{{ location|default:'' }}">
+                            <small class="text-muted">Search by location text (e.g., "New York")</small>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Max Distance (miles)</label>
